@@ -34,6 +34,9 @@ public class AppUser implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Expense> expenses;
+
     @PrePersist
     public void initUser(){
         this.role=Role.CUSTOMER;
