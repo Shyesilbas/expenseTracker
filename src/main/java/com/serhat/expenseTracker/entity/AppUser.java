@@ -24,11 +24,9 @@ public class AppUser implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
-    private String name;
     private String username;
     private String password;
     private String email;
-    private String phone;
 
     @Enumerated(EnumType.STRING)
     private MembershipPlan membershipPlan;

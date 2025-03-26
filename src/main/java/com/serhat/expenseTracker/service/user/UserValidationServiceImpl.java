@@ -17,10 +17,9 @@ public class UserValidationServiceImpl implements UserValidationService {
     private final UserRepository userRepository;
     @Override
     public void validateUserRegistration(RegisterRequest request) {
-        Optional<AppUser> existingUser = userRepository.findByEmailOrUsernameOrPhone(
+        Optional<AppUser> existingUser = userRepository.findByEmailOrUsername(
                 request.email(),
-                request.username(),
-                request.phone()
+                request.username()
         );
 
         existingUser.ifPresent(user -> {
@@ -29,9 +28,6 @@ public class UserValidationServiceImpl implements UserValidationService {
             }
             if (user.getUsername().equals(request.username())) {
                 throw new UsernameExists("Username already exists!");
-            }
-            if (user.getPhone().equals(request.phone())) {
-                throw new PhoneExistsException("Phone number already exists!");
             }
         });
     }

@@ -24,8 +24,7 @@ public class UserServiceImpl implements UserService {
         AppUser user = getCurrentUser();
         return new UserDto(
                 user.getUsername(),
-                user.getEmail(),
-                user.getPhone()
+                user.getEmail()
         );
     }
 

@@ -14,7 +14,6 @@ public class UserMapper {
     public AppUser toUser(RegisterRequest request){
         return AppUser.builder()
                 .email(request.email())
-                .phone(request.phone())
                 .password(passwordEncoder.encode(request.password()))
                 .username(request.username())
                 .build();

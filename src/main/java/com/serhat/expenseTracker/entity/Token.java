@@ -32,10 +32,6 @@ public class Token {
     @Enumerated(EnumType.STRING)
     private TokenStatus tokenStatus;
 
-
-    @Enumerated(EnumType.STRING)
-    private TokenType tokenType;
-
     @Temporal(TemporalType.TIMESTAMP)
     private Date expired_at;
 

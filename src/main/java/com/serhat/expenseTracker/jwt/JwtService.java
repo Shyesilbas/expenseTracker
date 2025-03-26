@@ -40,7 +40,7 @@ public class JwtService {
     }
 
     public String getTokenFromRequest(HttpServletRequest request) {
-        return jwtExtractor.getTokenFromAuthorizationHeader(request);
+        return jwtExtractor.getTokenFromRequest(request);
     }
 
 }

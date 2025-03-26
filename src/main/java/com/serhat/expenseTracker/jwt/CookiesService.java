@@ -15,7 +15,6 @@ public class CookiesService {
         cookie.setSecure(false);
         cookie.setPath("/");
         cookie.setMaxAge(3600);
-
         response.addCookie(cookie);
     }
 
