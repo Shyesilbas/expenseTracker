@@ -1,13 +1,19 @@
 package com.serhat.expenseTracker.dto.objects;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.serhat.expenseTracker.entity.enums.Category;
+import com.serhat.expenseTracker.entity.enums.PaymentMethod;
+import com.serhat.expenseTracker.entity.enums.Status;
+
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public record ExpenseDto(
          BigDecimal amount,
-         String date, // "dd-MM-yyyy"
-         String category,
-         Boolean isIncome,
-         String paymentMethod,
-         String note
+         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+         LocalDate date,
+         Category category,
+         Status status,
+         PaymentMethod paymentMethod
 ) {
 }

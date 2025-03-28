@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 @Entity
 @Data
@@ -27,7 +26,6 @@ public class Expense {
     private Long expenseId;
 
     private BigDecimal amount;
-    private String note;
 
     @Column(name = "date", nullable = false)
     private LocalDate date;
@@ -49,9 +47,6 @@ public class Expense {
     @Column(name = "currency", nullable = false)
     private Currency currency;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDate createdAt;
-
     @Column(name = "updated_at")
     private LocalDate updatedAt;
 
@@ -59,15 +54,8 @@ public class Expense {
     @JoinColumn(name = "user_id", nullable = false)
     private AppUser user;
 
-    @Transient // Not stored in DB, just for API/response
-    public String getFormattedDate() {
-        return date.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+    @PrePersist
+    void initExpense(){
+        this.updatedAt=LocalDate.now();
     }
-
-    // Set date from string in dd-MM-yyyy format
-    public void setDateFromString(String dateStr) {
-        this.date = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-    }
-
-
 }
