@@ -9,7 +9,9 @@ public class ExpenseMapper {
 
     public ExpenseDto toExpenseDto(Expense expense){
         return new ExpenseDto(
+                expense.getExpenseId(),
                 expense.getAmount(),
+                expense.getCurrency(),
                 expense.getDate(),
                 expense.getCategory(),
                 expense.getStatus(),

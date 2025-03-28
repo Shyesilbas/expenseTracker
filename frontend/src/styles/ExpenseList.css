@@ -1,0 +1,293 @@
+.expense-list-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.expense-list-container h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+.filters {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    align-items: center;
+}
+
+.modern-select {
+    padding: 12px 35px 12px 15px;
+    font-size: 0.95rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    color: #374151;
+    cursor: pointer;
+    min-width: 140px;
+    transition: all 0.2s ease;
+    appearance: none;
+    background: #ffffff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23637451' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") no-repeat right 12px center;
+}
+
+.expense-list-container {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.expense-list-container h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+.filters {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    align-items: center;
+}
+
+.modern-select {
+    padding: 12px 35px 12px 15px;
+    font-size: 0.95rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #374151;
+    cursor: pointer;
+    min-width: 140px;
+    transition: all 0.2s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23637451' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+
+.modern-select:hover {
+    border-color: #d1d5db;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.modern-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.fetch-btn {
+    padding: 12px 25px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.fetch-btn:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.expense-table-container {
+    overflow-x: auto;
+    border-radius: 10px;
+    background: #fafafa;
+    padding: 10px;
+}
+
+.expense-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.expense-table th, .expense-table td {
+    padding: 15px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #4b5563;
+}
+
+.expense-table th {
+    background: #f3f4f6;
+    color: #1f2937;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.expense-table td {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.expense-table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.expense-table tbody tr:hover {
+    background: #f1f5f9;
+}
+
+.expense-table td.incoming {
+    color: #16a34a;
+    font-weight: 600;
+}
+
+.expense-table td.outgoing {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.no-data {
+    padding: 20px;
+    color: #6b7280;
+    font-size: 1rem;
+    text-align: center;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+    .expense-list-container {
+        margin: 20px;
+        padding: 20px;
+    }
+
+    .filters {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .modern-select {
+        width: 100%;
+    }
+
+    .fetch-btn {
+        width: 100%;
+    }
+}
+
+.modern-select:hover {
+    border-color: #d1d5db;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.modern-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.fetch-btn {
+    padding: 12px 25px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.fetch-btn:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.expense-table-container {
+    overflow-x: auto;
+    border-radius: 10px;
+    background: #fafafa;
+    padding: 10px;
+}
+
+.expense-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.expense-table th, .expense-table td {
+    padding: 15px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #4b5563;
+}
+
+.expense-table th {
+    background: #f3f4f6;
+    color: #1f2937;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.expense-table td {
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.expense-table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.expense-table tbody tr:hover {
+    background: #f1f5f9;
+}
+
+.expense-table td.incoming {
+    color: #16a34a;
+    font-weight: 600;
+}
+
+.expense-table td.outgoing {
+    color: #dc2626;
+    font-weight: 600;
+}
+
+.no-data {
+    padding: 20px;
+    color: #6b7280;
+    font-size: 1rem;
+    text-align: center;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .expense-list-container {
+        margin: 20px;
+        padding: 20px;
+    }
+
+    .filters {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .modern-select {
+        width: 100%;
+    }
+
+    .fetch-btn {
+        width: 100%;
+    }
+}

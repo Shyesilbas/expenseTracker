@@ -1,8 +1,10 @@
-// src/components/Sidebar.js
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/Sidebar.css';
 
-function Sidebar({ onLogout, isOpen , onDashboard}) {
+function Sidebar({ onLogout, isOpen, onDashboard }) {
+    const navigate = useNavigate();
+
     return (
         <div className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
             <div className="sidebar-header">
@@ -12,6 +14,9 @@ function Sidebar({ onLogout, isOpen , onDashboard}) {
                 <ul>
                     <li>
                         <button className="sidebar-item" onClick={onDashboard}>Dashboard</button>
+                    </li>
+                    <li>
+                        <button className="sidebar-item" onClick={() => navigate('/expenses')}>Expenses</button>
                     </li>
                     <li>
                         <button className="sidebar-item">Profile</button>

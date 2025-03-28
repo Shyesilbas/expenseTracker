@@ -1,23 +1,29 @@
-// src/pages/Dashboard.js
 import React, { useEffect, useState } from 'react';
 import apiService from '../services/api';
 import '../styles/Dashboard.css';
 
 function Dashboard() {
     const [user, setUser] = useState(null);
+    const [monthlyBudget, setMonthlyBudget] = useState(null);
 
     useEffect(() => {
         let mounted = true;
 
-        const fetchUser = async () => {
+        const fetchData = async () => {
             try {
                 const userData = await apiService.getUserInfo();
-                if (mounted) setUser(userData);
+                const budgetData = await apiService.getMonthlyBudget();
+
+                if (mounted) {
+                    setUser(userData);
+                    setMonthlyBudget(budgetData);
+                }
             } catch (err) {
-                console.error('Failed to fetch user:', err);
+                console.error('Failed to fetch data:', err);
             }
         };
-        fetchUser();
+
+        fetchData();
 
         return () => {
             mounted = false;
@@ -29,6 +35,12 @@ function Dashboard() {
     return (
         <div className="dashboard-container">
             <h1 className="dashboard-title">Welcome, {user.username}</h1>
+            <div className="budget-card">
+                <h2>Monthly Budget Status</h2>
+                <p className={monthlyBudget < 0 ? 'negative' : 'positive'}>
+                    {monthlyBudget !== null ? `${monthlyBudget} USD` : 'Loading...'}
+                </p>
+            </div>
         </div>
     );
 }

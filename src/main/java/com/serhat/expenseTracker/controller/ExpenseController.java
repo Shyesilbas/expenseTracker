@@ -21,10 +21,30 @@ public class ExpenseController {
 
     private final ExpenseService expenseService;
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<ExpenseDto> createExpense(@RequestBody ExpenseRequest expenseRequest) {
         ExpenseDto createdExpense = expenseService.createExpense(expenseRequest);
         return ResponseEntity.ok(createdExpense);
+    }
+
+    @GetMapping()
+    public ResponseEntity<List<ExpenseDto>> getExpenses() {
+        List<ExpenseDto> expense = expenseService.getExpenses();
+        return ResponseEntity.ok(expense);
+    }
+
+    @GetMapping("/monthly")
+    public ResponseEntity<List<ExpenseDto>> getMonthlyExpenses(
+            @RequestParam int year,
+            @RequestParam int month) {
+        List<ExpenseDto> expenses = expenseService.findExpensesByMonth(year, month);
+        return ResponseEntity.ok(expenses);
+    }
+
+    @GetMapping("/yearly")
+    public ResponseEntity<List<ExpenseDto>> getYearlyExpenses(@RequestParam int year) {
+        List<ExpenseDto> expenses = expenseService.findExpensesByYear(year);
+        return ResponseEntity.ok(expenses);
     }
 
     @GetMapping("/{expenseId}")

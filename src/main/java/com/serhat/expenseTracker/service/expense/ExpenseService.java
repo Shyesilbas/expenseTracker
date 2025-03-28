@@ -12,8 +12,11 @@ import java.util.List;
 public interface ExpenseService {
     ExpenseDto createExpense(ExpenseRequest expenseRequest);
     ExpenseDto findExpenseById(Long expenseId);
+    List<ExpenseDto> getExpenses();
     List<ExpenseDto> findExpensesByCategory(Category category);
     List<ExpenseDto> findExpensesByStatus(Status status);
     List<ExpenseDto> findExpensesByCurrency(Currency currency);
     List<ExpenseDto> findByDate(LocalDate date);
+    List<ExpenseDto> findExpensesByMonth(int year, int month);
+    List<ExpenseDto> findExpensesByYear(int year);
 }

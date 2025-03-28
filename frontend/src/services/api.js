@@ -1,4 +1,3 @@
-// src/services/api.js
 import axios from 'axios';
 
 class ApiService {
@@ -41,7 +40,98 @@ class ApiService {
 
     async getUserInfo() {
         try {
-            const response = await this.api.get('/user/me');
+            const response = await this.api.get('/api/user/me');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async getMonthlyBudget() {
+        try {
+            const response = await this.api.get('/api/user/monthly-budget');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    // Expense APIs
+    async createExpense(data) {
+        try {
+            const response = await this.api.post('/api/expenses/create', data);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async getExpenses() {
+        try {
+            const response = await this.api.get('/api/expenses');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async getMonthlyExpenses(year, month) {
+        try {
+            const response = await this.api.get(`/api/expenses/monthly?year=${year}&month=${month}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async getYearlyExpenses(year) {
+        try {
+            const response = await this.api.get(`/api/expenses/yearly?year=${year}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async getExpenseById(expenseId) {
+        try {
+            const response = await this.api.get(`/api/expenses/${expenseId}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async getExpensesByCategory(category) {
+        try {
+            const response = await this.api.get(`/api/expenses/category?category=${category}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async getExpensesByStatus(status) {
+        try {
+            const response = await this.api.get(`/api/expenses/status?status=${status}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async getExpensesByCurrency(currency) {
+        try {
+            const response = await this.api.get(`/api/expenses/currency?currency=${currency}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async getExpensesByDate(date) {
+        try {
+            const response = await this.api.get(`/api/expenses/date?date=${date}`);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

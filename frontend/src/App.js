@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Register from './pages/Register';
+import ExpenseList from './pages/ExpenseList';
 import Sidebar from './components/Sidebar';
 import React, { useState, useEffect } from 'react';
 import apiService from './services/api';
@@ -61,6 +62,7 @@ function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/expenses" element={<ExpenseList />} />
                 </Routes>
             </div>
         </div>

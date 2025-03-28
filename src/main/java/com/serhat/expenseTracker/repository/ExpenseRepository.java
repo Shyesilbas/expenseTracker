@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense,Long> {
@@ -19,4 +20,11 @@ public interface ExpenseRepository extends JpaRepository<Expense,Long> {
     List<Expense> findExpensesByUserAndCurrency(AppUser user, Currency currency);
 
     List<Expense> findExpensesByUserAndDate(AppUser user, LocalDate date);
+
+    List<Expense> findByUser(AppUser user);
+    Optional<Expense> findByUserAndExpenseId(AppUser user, Long expenseId);
+    List<Expense> findExpensesByUserAndDateBetween(AppUser currentUser, LocalDate startDate, LocalDate endDate);
+
+    List<Expense> findByUserAndDateBetween(AppUser user, LocalDate startDate, LocalDate endDate);
+
 }
