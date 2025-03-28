@@ -17,6 +17,7 @@ public record ExpenseDto(
          LocalDate date,
          Category category,
          Status status,
+         String description,
          PaymentMethod paymentMethod
 ) {
 }

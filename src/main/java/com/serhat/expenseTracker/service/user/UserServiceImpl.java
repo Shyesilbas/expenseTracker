@@ -41,36 +41,63 @@ public class UserServiceImpl implements UserService {
         return monthlyIncome().subtract(monthlyOutgoings());
     }
 
-    public BigDecimal monthlyIncome() {
+    @Override
+    public BigDecimal monthlyIncome() { // current date
         LocalDate now = LocalDate.now();
         LocalDate startOfMonth = now.withDayOfMonth(1);
         LocalDate endOfMonth = now.withDayOfMonth(now.lengthOfMonth());
-
         return getIncomeBetweenDates(startOfMonth, endOfMonth);
     }
 
-    public BigDecimal monthlyOutgoings() {
+    @Override
+    public BigDecimal monthlyOutgoings() { // current date
         LocalDate now = LocalDate.now();
         LocalDate startOfMonth = now.withDayOfMonth(1);
         LocalDate endOfMonth = now.withDayOfMonth(now.lengthOfMonth());
-
         return getOutgoingsBetweenDates(startOfMonth, endOfMonth);
     }
 
+    @Override
     public BigDecimal annualIncome() {
         LocalDate now = LocalDate.now();
         LocalDate startOfYear = now.withDayOfYear(1);
         LocalDate endOfYear = now.withMonth(12).withDayOfMonth(31);
-
         return getIncomeBetweenDates(startOfYear, endOfYear);
     }
 
+    @Override
     public BigDecimal annualOutgoings() {
         LocalDate now = LocalDate.now();
         LocalDate startOfYear = now.withDayOfYear(1);
         LocalDate endOfYear = now.withMonth(12).withDayOfMonth(31);
-
         return getOutgoingsBetweenDates(startOfYear, endOfYear);
+    }
+
+    public BigDecimal annualBudget(){
+        return annualIncome().subtract(annualOutgoings());
+    }
+
+    @Override
+    public BigDecimal getBudgetStatusByYearAndMonth(int year, int month) { // for specific month and year
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+        BigDecimal income = getIncomeBetweenDates(startDate, endDate);
+        BigDecimal outgoings = getOutgoingsBetweenDates(startDate, endDate);
+        return income.subtract(outgoings);
+    }
+
+    @Override
+    public BigDecimal getIncomeByYearAndMonth(int year, int month) {
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+        return getIncomeBetweenDates(startDate, endDate);
+    }
+
+    @Override
+    public BigDecimal getOutgoingsByYearAndMonth(int year, int month) {
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+        return getOutgoingsBetweenDates(startDate, endDate);
     }
 
     private BigDecimal getIncomeBetweenDates(LocalDate startDate, LocalDate endDate) {
@@ -104,18 +131,20 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    @Override
     public AppUser createUser(RegisterRequest request) {
         AppUser user = userMapper.toUser(request);
         saveUser(user);
         return user;
     }
 
-    public void validateRegistration(RegisterRequest request){
+    @Override
+    public void validateRegistration(RegisterRequest request) {
         userValidationService.validateUserRegistration(request);
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) {
-       return userDetailsService.loadUserByUsername(username);
+        return userDetailsService.loadUserByUsername(username);
     }
 }

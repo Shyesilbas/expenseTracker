@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Sidebar.css';
 
-function Sidebar({ onLogout, isOpen, onDashboard }) {
+function Sidebar({ onLogout, isOpen }) {
     const navigate = useNavigate();
 
     return (
@@ -13,16 +13,13 @@ function Sidebar({ onLogout, isOpen, onDashboard }) {
             <nav className="sidebar-nav">
                 <ul>
                     <li>
-                        <button className="sidebar-item" onClick={onDashboard}>Dashboard</button>
+                        <button className="sidebar-item" onClick={() => navigate('/dashboard')}>Dashboard</button>
+                    </li>
+                    <li>
+                        <button className="sidebar-item" onClick={() => navigate('/expenses/add')}>Add Expense</button>
                     </li>
                     <li>
                         <button className="sidebar-item" onClick={() => navigate('/expenses')}>Expenses</button>
-                    </li>
-                    <li>
-                        <button className="sidebar-item">Profile</button>
-                    </li>
-                    <li>
-                        <button className="sidebar-item">Settings</button>
                     </li>
                     <li>
                         <button className="sidebar-item" onClick={onLogout}>

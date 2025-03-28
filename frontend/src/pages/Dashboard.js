@@ -12,7 +12,7 @@ function Dashboard() {
         const fetchData = async () => {
             try {
                 const userData = await apiService.getUserInfo();
-                const budgetData = await apiService.getMonthlyBudget();
+                const budgetData = await apiService.getCurrentMonthlyBudget();
 
                 if (mounted) {
                     setUser(userData);

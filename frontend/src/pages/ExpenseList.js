@@ -4,10 +4,17 @@ import '../styles/ExpenseList.css';
 
 function ExpenseList() {
     const [expenses, setExpenses] = useState([]);
+    const [monthlyBudget, setMonthlyBudget] = useState(null);
+    const [totalIncome, setTotalIncome] = useState(0.00);
+    const [totalSpent, setTotalSpent] = useState(0.00);
     const [year, setYear] = useState(new Date().getFullYear());
     const [month, setMonth] = useState(new Date().getMonth() + 1);
 
     useEffect(() => {
+        const currentYear = new Date().getFullYear();
+        const currentMonth = new Date().getMonth() + 1;
+        const isCurrentMonth = year === currentYear && month === currentMonth;
+
         const fetchExpenses = async () => {
             try {
                 const data = await apiService.getExpenses();
@@ -26,7 +33,44 @@ function ExpenseList() {
             }
         };
 
-        if (year && month) {
+        const fetchMonthlyBudget = async () => {
+            try {
+                const data = isCurrentMonth
+                    ? await apiService.getCurrentMonthlyBudget()
+                    : await apiService.getMonthlyBudget(year, month);
+                setMonthlyBudget(data);
+            } catch (error) {
+                console.error('Failed to fetch monthly budget:', error);
+            }
+        };
+
+        const fetchTotalIncome = async () => {
+            try {
+                const income = isCurrentMonth
+                    ? await apiService.getCurrentMonthlyIncome()
+                    : 0.00;
+                setTotalIncome(income);
+            } catch (error) {
+                console.error('Failed to fetch total income:', error);
+            }
+        };
+
+        const fetchTotalSpent = async () => {
+            try {
+                const spent = isCurrentMonth
+                    ? await apiService.getCurrentMonthlyOutgoings()
+                    : 0.00;
+                setTotalSpent(spent);
+            } catch (error) {
+                console.error('Failed to fetch total spent:', error);
+            }
+        };
+
+        fetchMonthlyBudget();
+        fetchTotalIncome();
+        fetchTotalSpent();
+
+        if (year && month && !isCurrentMonth) {
             fetchMonthlyExpenses();
         } else {
             fetchExpenses();
@@ -71,6 +115,28 @@ function ExpenseList() {
                 <button onClick={() => {}} className="fetch-btn">Refresh</button>
             </div>
 
+            {/* Monthly Budget Status */}
+            <div className="budget-status">
+                <span className="budget-label">Monthly Budget Status: </span>
+                <span className={monthlyBudget && monthlyBudget < 0 ? 'negative' : 'positive'}>
+                    {monthlyBudget !== null ? `${monthlyBudget} USD` : 'Loading...'}
+                </span>
+            </div>
+
+            {/* Total Income and Total Spent */}
+            <div className="budget-summary">
+                <div className="budget-item">
+                    <span className="budget-label">Total Income: </span>
+                    <span className="positive">{totalIncome !== null ? `${totalIncome} USD` : 'Loading...'}</span>
+                </div>
+                <div className="budget-item">
+                    <span className="budget-label">Total Spent: </span>
+                    <span className={totalSpent < 0 ? 'negative' : 'positive'}>
+                        {totalSpent !== null ? `${totalSpent} USD` : 'Loading...'}
+                    </span>
+                </div>
+            </div>
+
             {/* Expense Table */}
             <div className="expense-table-container">
                 {expenses.length === 0 ? (
@@ -82,7 +148,7 @@ function ExpenseList() {
                             <th>Date</th>
                             <th>Amount</th>
                             <th>Currency</th>
-                            <th>Payment Method</th>
+                            <th>Description</th>
                             <th>Category</th>
                         </tr>
                         </thead>
@@ -94,7 +160,7 @@ function ExpenseList() {
                                     {expense.amount}
                                 </td>
                                 <td>{expense.currency}</td>
-                                <td>{expense.paymentMethod}</td>
+                                <td>{expense.description}</td>
                                 <td>{expense.category}</td>
                             </tr>
                         ))}

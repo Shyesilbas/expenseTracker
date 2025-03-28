@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 public interface UserService {
     AppUser getCurrentUser();
     BigDecimal getMonthlyBudgetStatus();
+    BigDecimal annualBudget();
     UserDto userInfo();
     void saveUser(AppUser user);
     AppUser createUser(RegisterRequest request);
@@ -20,4 +21,8 @@ public interface UserService {
     BigDecimal monthlyOutgoings();
     BigDecimal annualOutgoings();
     BigDecimal annualIncome();
+
+    BigDecimal getBudgetStatusByYearAndMonth(int year, int month);
+    BigDecimal getIncomeByYearAndMonth(int year, int month);
+    BigDecimal getOutgoingsByYearAndMonth(int year, int month);
 }
