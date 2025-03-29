@@ -36,18 +36,6 @@ public class UserController {
         return ResponseEntity.ok(budgetStatus);
     }
 
-    @GetMapping("/annual-income")
-    public ResponseEntity<BigDecimal> getAnnualIncome() {
-        BigDecimal annualIncome = userService.annualIncome();
-        return ResponseEntity.ok(annualIncome);
-    }
-
-    @GetMapping("/annual-outgoings")
-    public ResponseEntity<BigDecimal> getAnnualOutgoings() {
-        BigDecimal annualOutgoings = userService.annualOutgoings();
-        return ResponseEntity.ok(annualOutgoings);
-    }
-
     @GetMapping("/annual-budget")
     public ResponseEntity<BigDecimal> getAnnualBudget() {
         BigDecimal annualOutgoings = userService.annualBudget();

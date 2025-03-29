@@ -15,8 +15,7 @@ public class ExpenseMapper {
                 expense.getDate(),
                 expense.getCategory(),
                 expense.getStatus(),
-                expense.getDescription(),
-                expense.getPaymentMethod()
+                expense.getDescription()
         );
     }
 

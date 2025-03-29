@@ -3,7 +3,6 @@ package com.serhat.expenseTracker.dto.objects;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.serhat.expenseTracker.entity.enums.Category;
 import com.serhat.expenseTracker.entity.enums.Currency;
-import com.serhat.expenseTracker.entity.enums.PaymentMethod;
 import com.serhat.expenseTracker.entity.enums.Status;
 
 import java.math.BigDecimal;
@@ -17,7 +16,6 @@ public record ExpenseDto(
          LocalDate date,
          Category category,
          Status status,
-         String description,
-         PaymentMethod paymentMethod
+         String description
 ) {
 }

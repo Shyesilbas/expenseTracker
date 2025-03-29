@@ -2,7 +2,6 @@ package com.serhat.expenseTracker.entity;
 
 import com.serhat.expenseTracker.entity.enums.Category;
 import com.serhat.expenseTracker.entity.enums.Currency;
-import com.serhat.expenseTracker.entity.enums.PaymentMethod;
 import com.serhat.expenseTracker.entity.enums.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -37,14 +36,12 @@ public class Expense {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @Column(name = "payment_method", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private PaymentMethod paymentMethod;
 
     @Column(name = "description")
     private String description;
 
     @Column(name = "currency", nullable = false)
+    @Enumerated(EnumType.STRING)
     private Currency currency;
 
     @Column(name = "updated_at")

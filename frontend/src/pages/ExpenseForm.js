@@ -12,7 +12,6 @@ function ExpenseForm() {
         date: formattedDate,
         category: '',
         status: 'OUTGOING',
-        paymentMethod: '',
         description: '',
         currency: 'TL'
     });
@@ -111,20 +110,6 @@ function ExpenseForm() {
                             <option value="TELECOMMUNICATION">Telecommunication</option>
                             <option value="TRANSPORTATION">Transportation</option>
                             <option value="TAX">Tax</option>
-                        </select>
-                    </div>
-                    <div className="form-group">
-                        <label>Payment Method</label>
-                        <select
-                            name="paymentMethod"
-                            value={expense.paymentMethod}
-                            onChange={handleChange}
-                            required
-                        >
-                            <option value="">Select method</option>
-                            <option value="CASH">Cash</option>
-                            <option value="BANK_TRANSFER">Bank Transfer</option>
-                            <option value="CREDIT_CARD">Credit Card</option>
                         </select>
                     </div>
                 </div>

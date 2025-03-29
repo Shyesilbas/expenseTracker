@@ -57,6 +57,35 @@ class ApiService {
         }
     }
 
+    async getCurrentMonthCategorySummary() {
+        try {
+            const response = await this.api.get('/api/expenses/current-month-category-summary');
+            return response.data;
+        } catch (error) {
+            console.error('Current month category summary fetch error:', error);
+            return {};
+        }
+    }
+
+    async getCurrentYearCategorySummary() {
+        try {
+            const response = await this.api.get('/api/expenses/current-year-category-summary');
+            return response.data;
+        } catch (error) {
+            console.error('Current year category summary fetch error:', error);
+            return {};
+        }
+    }
+    async getAnnualBudget() {
+        try {
+            const response = await this.api.get('/api/user/annual-budget');
+            return response.data;
+        } catch (error) {
+            console.error('Current monthly budget fetch error:', error);
+            return 0.00;
+        }
+    }
+
     async getMonthlyBudget(year, month) {
         try {
             const response = await this.api.get(`/api/user/budget/${year}/${month}`);
@@ -108,25 +137,6 @@ class ApiService {
         }
     }
 
-    async getAnnualIncome(year) {
-        try {
-            const response = await this.api.get(`/api/user/annual-income?year=${year}`);
-            return response.data;
-        } catch (error) {
-            console.error('Annual income fetch error:', error);
-            return 0.00;
-        }
-    }
-
-    async getAnnualOutgoings(year) {
-        try {
-            const response = await this.api.get(`/api/user/annual-outgoings?year=${year}`);
-            return response.data;
-        } catch (error) {
-            console.error('Annual outgoings fetch error:', error);
-            return 0.00;
-        }
-    }
 
     // Expense APIs
     async createExpense(data) {
@@ -150,24 +160,6 @@ class ApiService {
     async getMonthlyExpenses(year, month) {
         try {
             const response = await this.api.get(`/api/expenses/monthly?year=${year}&month=${month}`);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    }
-
-    async getYearlyExpenses(year) {
-        try {
-            const response = await this.api.get(`/api/expenses/yearly?year=${year}`);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    }
-
-    async getExpenseById(expenseId) {
-        try {
-            const response = await this.api.get(`/api/expenses/${expenseId}`);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

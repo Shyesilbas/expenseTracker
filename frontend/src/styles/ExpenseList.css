@@ -1,5 +1,5 @@
 .expense-list-container {
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 40px auto;
     padding: 30px;
     background: #ffffff;
@@ -21,6 +21,7 @@
     gap: 15px;
     margin-bottom: 30px;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .modern-select {
@@ -68,7 +69,7 @@
     overflow-x: auto;
     border-radius: 10px;
     background: #fafafa;
-    padding: 10px;
+    padding: 15px;
 }
 
 .expense-table {
@@ -124,9 +125,20 @@
 }
 
 .budget-status {
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     font-size: 1.1rem;
     text-align: left;
+}
+
+.budget-summary {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 25px;
+}
+
+.budget-item {
+    display: flex;
+    align-items: center;
 }
 
 .budget-label {
@@ -135,35 +147,16 @@
     margin-right: 10px;
 }
 
-.budget-status .positive {
+.budget-status .positive,
+.budget-item .positive {
     color: #16a34a;
     font-weight: 600;
 }
 
-.budget-status .negative {
+.budget-status .negative,
+.budget-item .negative {
     color: #dc2626;
     font-weight: 600;
-}
-
-.add-expense-btn {
-    padding: 12px 25px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.add-expense-btn:hover {
-    background: linear-gradient(135deg, #059669, #047857);
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
 /* Responsive adjustments */
@@ -178,11 +171,13 @@
         gap: 10px;
     }
 
-    .modern-select {
+    .modern-select,
+    .fetch-btn {
         width: 100%;
     }
 
-    .fetch-btn {
-        width: 100%;
+    .budget-summary {
+        flex-direction: column;
+        gap: 15px;
     }
 }

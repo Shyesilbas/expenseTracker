@@ -8,6 +8,7 @@ import com.serhat.expenseTracker.entity.enums.Status;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public interface ExpenseService {
     ExpenseDto createExpense(ExpenseRequest expenseRequest);
@@ -19,4 +20,6 @@ public interface ExpenseService {
     List<ExpenseDto> findByDate(LocalDate date);
     List<ExpenseDto> findExpensesByMonth(int year, int month);
     List<ExpenseDto> findExpensesByYear(int year);
+    Map<Category, CategorySummary> getCurrentMonthCategorySummary();
+    Map<Category, CategorySummary> getCurrentYearCategorySummary();
 }

@@ -5,6 +5,7 @@ import com.serhat.expenseTracker.dto.requests.ExpenseRequest;
 import com.serhat.expenseTracker.entity.enums.Category;
 import com.serhat.expenseTracker.entity.enums.Currency;
 import com.serhat.expenseTracker.entity.enums.Status;
+import com.serhat.expenseTracker.service.expense.CategorySummary;
 import com.serhat.expenseTracker.service.expense.ExpenseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/expenses")
@@ -69,6 +71,17 @@ public class ExpenseController {
     public ResponseEntity<List<ExpenseDto>> getExpensesByCurrency(@RequestParam Currency currency) {
         List<ExpenseDto> expenses = expenseService.findExpensesByCurrency(currency);
         return ResponseEntity.ok(expenses);
+    }
+
+    @GetMapping("/current-month-category-summary")
+    public ResponseEntity<Map<Category, CategorySummary>> getCurrentMonthCategorySummary() {
+        Map<Category, CategorySummary> summary = expenseService.getCurrentMonthCategorySummary();
+        return ResponseEntity.ok(summary);
+    }
+    @GetMapping("/current-year-category-summary")
+    public ResponseEntity<Map<Category, CategorySummary>> getCurrentYearCategorySummary() {
+        Map<Category, CategorySummary> summary = expenseService.getCurrentYearCategorySummary();
+        return ResponseEntity.ok(summary);
     }
 
     @GetMapping("/date")

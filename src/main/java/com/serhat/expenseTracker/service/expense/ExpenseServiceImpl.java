@@ -19,6 +19,8 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -72,7 +74,6 @@ public class ExpenseServiceImpl implements ExpenseService {
                 .description(expenseRequest.description())
                 .category(expenseRequest.category())
                 .date(expenseRequest.date())
-                .paymentMethod(expenseRequest.paymentMethod())
                 .status(expenseRequest.status())
                 .currency(expenseRequest.currency())
                 .user(user)
@@ -125,5 +126,54 @@ public class ExpenseServiceImpl implements ExpenseService {
                 .stream()
                 .map(expenseMapper::toExpenseDto)
                 .toList();
+    }
+
+    @Override
+    public Map<Category, CategorySummary> getCurrentMonthCategorySummary() {
+        AppUser user = currentUser();
+        LocalDate now = LocalDate.now();
+        LocalDate startDate = YearMonth.from(now).atDay(1);
+        LocalDate endDate = YearMonth.from(now).atEndOfMonth();
+
+        List<Expense> expenses = expenseRepository.findByUserAndDateBetween(user, startDate, endDate);
+
+        return expenses.stream()
+                .collect(Collectors.groupingBy(
+                        Expense::getCategory,
+                        Collectors.collectingAndThen(
+                                Collectors.toList(),
+                                list -> new CategorySummary(
+                                        list.size(),
+                                        list.stream()
+                                                .filter(expense -> expense.getStatus() == Status.OUTGOING)
+                                                .mapToDouble(expense -> expense.getAmount().doubleValue())
+                                                .sum()
+                                )
+                        )
+                ));
+    }
+
+    public Map<Category, CategorySummary> getCurrentYearCategorySummary() {
+        AppUser user = currentUser();
+        LocalDate now = LocalDate.now();
+        LocalDate startDate = LocalDate.of(now.getYear(), 1, 1); // Start of the year
+        LocalDate endDate = now;
+
+        List<Expense> expenses = expenseRepository.findByUserAndDateBetween(user, startDate, endDate);
+
+        return expenses.stream()
+                .collect(Collectors.groupingBy(
+                        Expense::getCategory,
+                        Collectors.collectingAndThen(
+                                Collectors.toList(),
+                                list -> new CategorySummary(
+                                        list.size(),
+                                        list.stream()
+                                                .filter(expense -> expense.getStatus() == Status.OUTGOING)
+                                                .mapToDouble(expense -> expense.getAmount().doubleValue())
+                                                .sum()
+                                )
+                        )
+                ));
     }
 }
