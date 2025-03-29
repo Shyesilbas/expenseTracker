@@ -36,7 +36,7 @@ function ExpenseForm() {
             };
             console.log('Sending expense:', expenseToSend);
             await apiService.createExpense(expenseToSend);
-            alert('Expense added successfully!');
+            alert('Transaction added successfully!');
             navigate('/expenses');
         } catch (err) {
             console.error('Error adding expense:', err.response || err);
@@ -46,7 +46,7 @@ function ExpenseForm() {
 
     return (
         <div className="modern-expense-form-container">
-            <h2>Add Expense</h2>
+            <h2>Add Transaction</h2>
             <form onSubmit={handleSubmit} className="modern-expense-form">
                 <div className="form-row">
                     <div className="form-group">

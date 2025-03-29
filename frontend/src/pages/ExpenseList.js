@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import apiService from '../services/api';
 import ExpensePieChart from '../components/ExpensePieChart';
+import IncomePieChart from '../components/IncomePieChart';
 import '../styles/ExpenseList.css';
 
 function ExpenseList() {
@@ -17,26 +18,36 @@ function ExpenseList() {
 
     const fetchData = async () => {
         try {
-            const expenseData = await apiService.getMonthlyExpenses(year, month);
+            const budget = await apiService.getMonthlyBudget(year, month);
+            const income = await apiService.getMonthlyIncome(year, month);
+            const spent = await apiService.getMonthlyOutgoings(year, month);
 
-            let filteredExpenses = expenseData;
+            // Set budget, income, and spending data
+            setMonthlyBudget(budget);
+            setTotalIncome(income);
+            setTotalSpent(spent);
+
+            // Fetch expenses based on filters
+            let expenseData = await apiService.getMonthlyExpenses(year, month);
+
             if (category) {
-                filteredExpenses = filteredExpenses.filter(expense => expense.category === category);
-            }
-            if (status) {
-                filteredExpenses = filteredExpenses.filter(expense => expense.status === status);
-            }
-            if (currency) {
-                filteredExpenses = filteredExpenses.filter(expense => expense.currency === currency);
-            }
-            if (date) {
-                filteredExpenses = filteredExpenses.filter(expense => expense.date === date);
+                expenseData = await apiService.getExpensesByCategory(category);
             }
 
-            setExpenses(filteredExpenses);
-            setMonthlyBudget(await apiService.getMonthlyBudget(year, month));
-            setTotalIncome(await apiService.getMonthlyIncome(year, month));
-            setTotalSpent(await apiService.getMonthlyOutgoings(year, month));
+            if (status) {
+                expenseData = await apiService.getExpensesByStatus(status);
+            }
+
+            if (currency) {
+                expenseData = await apiService.getExpensesByCurrency(currency);
+            }
+
+            if (date) {
+                expenseData = await apiService.getExpensesByDate(date);
+            }
+
+            // Update state with filtered expenses
+            setExpenses(expenseData);
         } catch (error) {
             console.error('Failed to fetch data:', error);
         }
@@ -72,7 +83,7 @@ function ExpenseList() {
 
     return (
         <div className="expense-list-container">
-            <h1>All Expenses</h1>
+            <h1>All Transactions</h1>
 
             <div className="filters">
                 <select value={year} onChange={handleYearChange} className="modern-select">
@@ -82,9 +93,9 @@ function ExpenseList() {
                     })}
                 </select>
                 <select value={month} onChange={handleMonthChange} className="modern-select">
-                    {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+                    {Array.from({length: 12}, (_, i) => i + 1).map(m => (
                         <option key={m} value={m}>
-                            {new Date(0, m - 1).toLocaleString('en', { month: 'long' })}
+                            {new Date(0, m - 1).toLocaleString('en', {month: 'long'})}
                         </option>
                     ))}
                 </select>
@@ -132,11 +143,6 @@ function ExpenseList() {
                 </div>
             </div>
 
-            <div className="chart-container">
-                <h2>Expense Distribution by Category</h2>
-                <ExpensePieChart expenses={expenses.filter(exp => exp.status === 'OUTGOING')} />
-            </div>
-
             <div className="expense-table-container">
                 {expenses.length === 0 ? (
                     <p className="no-data">No expenses found for this period.</p>
@@ -166,6 +172,17 @@ function ExpenseList() {
                         </tbody>
                     </table>
                 )}
+            </div>
+
+            <div className="chart-container-wrapper">
+                <div className="chart-container">
+                    <h2>Expense Distribution by Category</h2>
+                    <ExpensePieChart expenses={expenses.filter(exp => exp.status === 'OUTGOING')}/>
+                </div>
+                <div className="chart-container">
+                    <h2>Income Distribution by Category</h2>
+                    <ExpensePieChart expenses={expenses.filter(exp => exp.status === 'INCOME')}/>
+                </div>
             </div>
         </div>
     );

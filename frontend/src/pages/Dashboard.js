@@ -45,6 +45,22 @@ function Dashboard() {
 
     if (!user) return <div className="dashboard-loading">Loading...</div>;
 
+    const renderCategorySummary = (categorySummary) => {
+        return Object.entries(categorySummary).map(([category, summary]) => (
+            <li key={category}>
+                <span className="category-name">{category}</span>
+                <span className="category-details">
+                    {summary.transactionCount} transactions,
+                    {summary.status === "INCOME" ? (
+                        `${summary.totalAmount.toFixed(2)} USD income`
+                    ) : (
+                        `${summary.totalAmount.toFixed(2)} USD spent`
+                    )}
+                </span>
+            </li>
+        ));
+    };
+
     return (
         <div className="dashboard-container">
             <h1 className="dashboard-title">Welcome, {user.username}</h1>
@@ -63,15 +79,7 @@ function Dashboard() {
                         <h3>Category Breakdown</h3>
                         {Object.keys(monthlyCategorySummary).length > 0 ? (
                             <ul>
-                                {Object.entries(monthlyCategorySummary).map(([category, summary]) => (
-                                    <li key={category}>
-                                        <span className="category-name">{category}</span>
-                                        <span className="category-details">
-                                            {summary.transactionCount} transactions,
-                                            {summary.totalAmount.toFixed(2)} USD spent
-                                        </span>
-                                    </li>
-                                ))}
+                                {renderCategorySummary(monthlyCategorySummary)}
                             </ul>
                         ) : (
                             <p>No data available</p>
@@ -92,15 +100,7 @@ function Dashboard() {
                         <h3>Category Breakdown</h3>
                         {Object.keys(annualCategorySummary).length > 0 ? (
                             <ul>
-                                {Object.entries(annualCategorySummary).map(([category, summary]) => (
-                                    <li key={category}>
-                                        <span className="category-name">{category}</span>
-                                        <span className="category-details">
-                                            {summary.transactionCount} transactions,
-                                            {summary.totalAmount.toFixed(2)} USD spent
-                                        </span>
-                                    </li>
-                                ))}
+                                {renderCategorySummary(annualCategorySummary)}
                             </ul>
                         ) : (
                             <p>No data available</p>

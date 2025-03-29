@@ -13,7 +13,7 @@
     font-weight: 600;
     color: #1f2937;
     margin-bottom: 25px;
-    text-align: left;
+    text-align: center;
 }
 
 .filters {
@@ -157,7 +157,7 @@
     color: #1f2937;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
 }
 
 .expense-table td {
@@ -191,6 +191,20 @@
     border-radius: 8px;
 }
 
+/* Layout adjustments for side-by-side charts */
+.chart-container-wrapper {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.chart-container {
+    flex: 1;
+    min-width: 280px;
+    max-width: 45%; /* Adjusts the width to prevent them from becoming too large */
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .expense-list-container {
@@ -213,12 +227,17 @@
         gap: 15px;
     }
 
+    .chart-container-wrapper {
+        flex-direction: column;
+        gap: 20px;
+    }
+
     .chart-container {
         padding: 15px;
+        max-width: 100%;
     }
 
     .pie-chart-wrapper {
-        max-width: 100%;
         height: 250px;
     }
 }
