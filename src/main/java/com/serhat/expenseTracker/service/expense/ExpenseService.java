@@ -2,6 +2,7 @@ package com.serhat.expenseTracker.service.expense;
 
 import com.serhat.expenseTracker.dto.objects.ExpenseDto;
 import com.serhat.expenseTracker.dto.requests.ExpenseRequest;
+import com.serhat.expenseTracker.dto.requests.UpdateExpenseRequest;
 import com.serhat.expenseTracker.entity.enums.Category;
 import com.serhat.expenseTracker.entity.enums.Currency;
 import com.serhat.expenseTracker.entity.enums.Status;
@@ -13,6 +14,10 @@ import java.util.Map;
 public interface ExpenseService {
     ExpenseDto createExpense(ExpenseRequest expenseRequest);
     ExpenseDto findExpenseById(Long expenseId);
+
+    ExpenseDto updateExpense(UpdateExpenseRequest request);
+
+    String deleteExpense(Long expenseId);
     List<ExpenseDto> getExpenses();
     List<ExpenseDto> findExpensesByCategory(Category category);
     List<ExpenseDto> findExpensesByStatus(Status status);

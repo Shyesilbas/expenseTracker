@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import apiService from '../services/api';
 import ExpensePieChart from '../components/ExpensePieChart';
-import IncomePieChart from '../components/IncomePieChart';
 import '../styles/ExpenseList.css';
 
 function ExpenseList() {
@@ -15,6 +14,14 @@ function ExpenseList() {
     const [status, setStatus] = useState('');
     const [currency, setCurrency] = useState('');
     const [date, setDate] = useState('');
+    const [editingExpenseId, setEditingExpenseId] = useState(null);
+    const [editForm, setEditForm] = useState({
+        amount: '',
+        currency: '',
+        status: '',
+        category: '',
+        date: '',
+    });
 
     const fetchData = async () => {
         try {
@@ -22,12 +29,10 @@ function ExpenseList() {
             const income = await apiService.getMonthlyIncome(year, month);
             const spent = await apiService.getMonthlyOutgoings(year, month);
 
-            // Set budget, income, and spending data
             setMonthlyBudget(budget);
             setTotalIncome(income);
             setTotalSpent(spent);
 
-            // Fetch expenses based on filters
             let expenseData = await apiService.getMonthlyExpenses(year, month);
 
             if (category) {
@@ -46,7 +51,6 @@ function ExpenseList() {
                 expenseData = await apiService.getExpensesByDate(date);
             }
 
-            // Update state with filtered expenses
             setExpenses(expenseData);
         } catch (error) {
             console.error('Failed to fetch data:', error);
@@ -56,6 +60,73 @@ function ExpenseList() {
     useEffect(() => {
         fetchData();
     }, [year, month, category, status, currency, date]);
+
+    const handleDeleteExpense = async (expenseId) => {
+        if (!expenseId || isNaN(expenseId)) {
+            console.error("Invalid expense ID:", expenseId);
+            return;
+        }
+        try {
+            await apiService.deleteExpense(expenseId);
+            fetchData();
+        } catch (error) {
+            console.error('Error deleting expense:', error);
+        }
+    };
+
+    const handleUpdateExpense = async (expenseId) => {
+        const formatDate = (dateStr) => {
+            if (!dateStr) return undefined;
+            const [year, month, day] = dateStr.split('-');
+            return `${day}-${month}-${year}`;
+        };
+
+        const updateData = {
+            id: expenseId, // Match the backend's UpdateExpenseRequest "id"
+            amount: editForm.amount ? Number(editForm.amount) : undefined,
+            currency: editForm.currency || undefined,
+            status: editForm.status || undefined,
+            category: editForm.category || undefined,
+            date: editForm.date ? formatDate(editForm.date) : undefined,
+        };
+
+        try {
+            await apiService.updateExpense(expenseId, updateData);
+            setEditingExpenseId(null);
+            setEditForm({
+                amount: '',
+                currency: '',
+                status: '',
+                category: '',
+                date: '',
+            });
+            fetchData();
+        } catch (error) {
+            console.error('Error updating expense:', error);
+        }
+    };
+
+    const startEditing = (expense) => {
+        setEditingExpenseId(expense.expenseId); // Use expenseId from backend
+        setEditForm({
+            amount: expense.amount || '',
+            currency: expense.currency || '',
+            status: expense.status || '',
+            category: expense.category || '',
+            date: expense.date.split('.').reverse().join('-') || '', // Convert dd.MM.yyyy to yyyy-MM-dd
+        });
+    };
+
+    const cancelEditing = () => {
+        setEditingExpenseId(null);
+        setEditForm({
+            amount: '',
+            currency: '',
+            status: '',
+            category: '',
+            date: '',
+        });
+    };
 
     const handleYearChange = (e) => {
         setYear(parseInt(e.target.value));
@@ -155,18 +226,101 @@ function ExpenseList() {
                             <th>Currency</th>
                             <th>Description</th>
                             <th>Category</th>
+                            <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                         </thead>
                         <tbody>
                         {expenses.map((expense) => (
-                            <tr key={expense.id}>
-                                <td>{expense.date}</td>
-                                <td className={expense.status === 'OUTGOING' ? 'outgoing' : 'incoming'}>
-                                    {expense.amount}
-                                </td>
-                                <td>{expense.currency}</td>
-                                <td>{expense.description || '-'}</td>
-                                <td>{expense.category}</td>
+                            <tr key={expense.expenseId}>
+                                {editingExpenseId === expense.expenseId ? (
+                                    <>
+                                        <td>
+                                            <input
+                                                type="date"
+                                                value={editForm.date}
+                                                onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
+                                            />
+                                        </td>
+                                        <td>
+                                            <input
+                                                type="number"
+                                                value={editForm.amount}
+                                                onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })}
+                                            />
+                                        </td>
+                                        <td>
+                                            <select
+                                                value={editForm.currency}
+                                                onChange={(e) => setEditForm({ ...editForm, currency: e.target.value })}
+                                            >
+                                                {currencies.map(curr => (
+                                                    <option key={curr} value={curr}>{curr || 'Select'}</option>
+                                                ))}
+                                            </select>
+                                        </td>
+                                        <td>{expense.description || '-'}</td>
+                                        <td>
+                                            <select
+                                                value={editForm.category}
+                                                onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                                            >
+                                                {categories.map(cat => (
+                                                    <option key={cat} value={cat}>{cat || 'Select'}</option>
+                                                ))}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select
+                                                value={editForm.status}
+                                                onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                                            >
+                                                {statuses.map(stat => (
+                                                    <option key={stat} value={stat}>{stat || 'Select'}</option>
+                                                ))}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <button
+                                                className="update-btn"
+                                                onClick={() => handleUpdateExpense(expense.expenseId)}
+                                            >
+                                                Save
+                                            </button>
+                                            <button
+                                                className="cancel-btn"
+                                                onClick={cancelEditing}
+                                            >
+                                                Cancel
+                                            </button>
+                                        </td>
+                                    </>
+                                ) : (
+                                    <>
+                                        <td>{expense.date}</td>
+                                        <td className={expense.status === 'OUTGOING' ? 'outgoing' : 'incoming'}>
+                                            {expense.amount}
+                                        </td>
+                                        <td>{expense.currency}</td>
+                                        <td>{expense.description || '-'}</td>
+                                        <td>{expense.category}</td>
+                                        <td>{expense.status}</td>
+                                        <td>
+                                            <button
+                                                className="update-btn"
+                                                onClick={() => startEditing(expense)}
+                                            >
+                                                Update
+                                            </button>
+                                            <button
+                                                className="delete-btn"
+                                                onClick={() => handleDeleteExpense(expense.expenseId)}
+                                            >
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </>
+                                )}
                             </tr>
                         ))}
                         </tbody>

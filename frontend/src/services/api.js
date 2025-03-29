@@ -249,6 +249,24 @@ class ApiService {
         }
     }
 
+    async deleteExpense(expenseId) {
+        try {
+            const response = await this.api.delete(`/api/expenses/delete/${expenseId}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async updateExpense(expenseId, data) {
+        try {
+            const response = await this.api.put(`/api/expenses/update/${expenseId}`, data);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
     async getMySavings() {
         try {
             const response = await this.api.get('/api/savings/mySavings');

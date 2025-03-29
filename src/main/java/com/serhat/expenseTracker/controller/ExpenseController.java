@@ -2,6 +2,7 @@ package com.serhat.expenseTracker.controller;
 
 import com.serhat.expenseTracker.dto.objects.ExpenseDto;
 import com.serhat.expenseTracker.dto.requests.ExpenseRequest;
+import com.serhat.expenseTracker.dto.requests.UpdateExpenseRequest;
 import com.serhat.expenseTracker.entity.enums.Category;
 import com.serhat.expenseTracker.entity.enums.Currency;
 import com.serhat.expenseTracker.entity.enums.Status;
@@ -65,6 +66,21 @@ public class ExpenseController {
     public ResponseEntity<List<ExpenseDto>> getExpensesByStatus(@RequestParam Status status) {
         List<ExpenseDto> expenses = expenseService.findExpensesByStatus(status);
         return ResponseEntity.ok(expenses);
+    }
+
+    @DeleteMapping("/delete/{expenseId}")
+    public ResponseEntity<String> deleteExpense(@PathVariable Long expenseId) {
+        return ResponseEntity.ok(expenseService.deleteExpense(expenseId));
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ExpenseDto> updateExpense(
+            @PathVariable Long id,
+            @RequestBody UpdateExpenseRequest request) {
+        if (!id.equals(request.id())) {
+            throw new IllegalArgumentException("Path variable ID must match request body ID");
+        }
+        return ResponseEntity.ok(expenseService.updateExpense(request));
     }
 
     @GetMapping("/currency")

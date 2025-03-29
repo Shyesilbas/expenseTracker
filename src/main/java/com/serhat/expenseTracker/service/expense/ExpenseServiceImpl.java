@@ -2,6 +2,7 @@ package com.serhat.expenseTracker.service.expense;
 
 import com.serhat.expenseTracker.dto.objects.ExpenseDto;
 import com.serhat.expenseTracker.dto.requests.ExpenseRequest;
+import com.serhat.expenseTracker.dto.requests.UpdateExpenseRequest;
 import com.serhat.expenseTracker.entity.AppUser;
 import com.serhat.expenseTracker.entity.Expense;
 import com.serhat.expenseTracker.entity.enums.Category;
@@ -32,6 +33,46 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     private AppUser currentUser() {
         return userService.getCurrentUser();
+    }
+
+    @Override
+    public String deleteExpense(Long expenseId) {
+        AppUser user = userService.getCurrentUser();
+        Expense expense = expenseRepository.findByUserAndExpenseId(user, expenseId)
+                .orElseThrow(() -> new ExpenseNotFoundException("Expense not found by id: " + expenseId));
+
+        expenseRepository.delete(expense);
+        return "Expense deleted successfully.";
+    }
+
+    @Override
+    public ExpenseDto updateExpense(UpdateExpenseRequest request) {
+        if (request.id() == null) {
+            throw new IllegalArgumentException("Expense ID cannot be null");
+        }
+
+        AppUser user = userService.getCurrentUser();
+        Expense expense = expenseRepository.findByUserAndExpenseId(user, request.id())
+                .orElseThrow(() -> new ExpenseNotFoundException("Expense not found by id: " + request.id()));
+
+        if (request.amount() != null) {
+            expense.setAmount(request.amount());
+        }
+        if (request.currency() != null) {
+            expense.setCurrency(request.currency());
+        }
+        if (request.status() != null) {
+            expense.setStatus(request.status());
+        }
+        if (request.category() != null) {
+            expense.setCategory(request.category());
+        }
+        if (request.date() != null) {
+            expense.setDate(request.date());
+        }
+
+        expenseRepository.save(expense);
+        return expenseMapper.toExpenseDto(expense);
     }
 
     @Override
