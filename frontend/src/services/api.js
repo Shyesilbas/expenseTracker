@@ -221,6 +221,51 @@ class ApiService {
             throw error.response?.data || error.message;
         }
     }
+
+    async addSaving(data) {
+        try {
+            const response = await this.api.post('/api/savings/addSaving', data);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async deleteSaving(id) {
+        try {
+            const response = await this.api.delete(`/api/savings/delete/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async updateSaving(data) {
+        try {
+            const response = await this.api.put('/api/savings/update', data);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async getMySavings() {
+        try {
+            const response = await this.api.get('/api/savings/mySavings');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async getSavingsByCurrency(currency) {
+        try {
+            const response = await this.api.get(`/api/savings/byCurrency?currency=${currency}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
 }
 
 export default new ApiService();

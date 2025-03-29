@@ -37,6 +37,9 @@ public class AppUser implements UserDetails {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Expense> expenses;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Savings> savings;
+
     @PrePersist
     public void initUser(){
         this.role=Role.CUSTOMER;

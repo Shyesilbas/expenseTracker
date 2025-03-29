@@ -16,10 +16,14 @@ function Sidebar({ onLogout, isOpen }) {
                         <button className="sidebar-item" onClick={() => navigate('/dashboard')}>Dashboard</button>
                     </li>
                     <li>
-                        <button className="sidebar-item" onClick={() => navigate('/expenses/add')}>Add Transaction</button>
+                        <button className="sidebar-item" onClick={() => navigate('/expenses/add')}>Add Transaction
+                        </button>
                     </li>
                     <li>
                         <button className="sidebar-item" onClick={() => navigate('/expenses')}>Transactions</button>
+                    </li>
+                    <li>
+                        <button className="sidebar-item" onClick={() => navigate('/savings')}>Savings Page</button>
                     </li>
                     <li>
                         <button className="sidebar-item" onClick={onLogout}>

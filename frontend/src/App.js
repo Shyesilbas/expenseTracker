@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Register from './pages/Register';
 import ExpenseList from './pages/ExpenseList';
+import SavingsPage from './pages/SavingsPage';
 import ExpenseForm from './pages/ExpenseForm';
 import Sidebar from './components/Sidebar';
 import React, { useState, useEffect } from 'react';
@@ -63,6 +64,7 @@ function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/savings" element={<SavingsPage />} />
                     <Route path="/expenses" element={<ExpenseList />} />
                     <Route path="/expenses/add" element={<ExpenseForm />} />
                 </Routes>

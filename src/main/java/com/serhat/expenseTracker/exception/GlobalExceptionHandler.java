@@ -137,5 +137,17 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(SavingNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleSavingNotFoundException(SavingNotFoundException e){
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                e.getMessage(),
+                "Saving Not Found!",
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(errorResponse,HttpStatus.BAD_REQUEST);
+    }
 }
 
