@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import apiService from '../services/api';
+import ExpensePieChart from '../components/ExpensePieChart';
 import '../styles/ExpenseList.css';
 
 function ExpenseList() {
@@ -62,7 +63,10 @@ function ExpenseList() {
         setDate('');
     };
 
-    const categories = ['', 'SHOPPING', 'RENT', 'INVESTMENT', 'EDUCATION', 'DEBT_PAYMENT', 'SALARY', 'TRAVEL', 'OTHER', 'BET', 'TELECOMMUNICATION', 'TRANSPORTATION', 'TAX'];
+    const categories = [
+        '', 'SHOPPING', 'RENT', 'INVESTMENT', 'EDUCATION', 'DEBT_PAYMENT', 'SALARY',
+        'TRAVEL', 'OTHER', 'BET', 'TELECOMMUNICATION', 'TRANSPORTATION', 'TAX'
+    ];
     const statuses = ['', 'INCOME', 'OUTGOING'];
     const currencies = ['', 'USD', 'EUR', 'TL'];
 
@@ -99,7 +103,12 @@ function ExpenseList() {
                         <option key={curr} value={curr}>{curr || 'All Currencies'}</option>
                     ))}
                 </select>
-                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="modern-select" />
+                <input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="modern-select"
+                />
                 <button onClick={fetchData} className="fetch-btn">Refresh</button>
             </div>
 
@@ -109,6 +118,7 @@ function ExpenseList() {
                     {monthlyBudget !== null ? `${monthlyBudget} USD` : 'Loading...'}
                 </span>
             </div>
+
             <div className="budget-summary">
                 <div className="budget-item">
                     <span className="budget-label">Total Income: </span>
@@ -120,6 +130,11 @@ function ExpenseList() {
                         {totalSpent !== null ? `${totalSpent} USD` : 'Loading...'}
                     </span>
                 </div>
+            </div>
+
+            <div className="chart-container">
+                <h2>Expense Distribution by Category</h2>
+                <ExpensePieChart expenses={expenses.filter(exp => exp.status === 'OUTGOING')} />
             </div>
 
             <div className="expense-table-container">
