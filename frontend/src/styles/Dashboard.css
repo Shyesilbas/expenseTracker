@@ -99,6 +99,30 @@
     text-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
 }
 
+.sub-cards {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.income-card,
+.outgoings-card {
+    background-color: #f3f4f6;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    width: 48%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.income-card h3,
+.outgoings-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 10px;
+}
+
 .category-summary {
     text-align: left;
 }
@@ -170,5 +194,16 @@
 
     .panel-value span {
         font-size: 2rem;
+    }
+
+    .sub-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .income-card,
+    .outgoings-card {
+        width: 100%;
+        margin-bottom: 15px;
     }
 }

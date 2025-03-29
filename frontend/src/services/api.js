@@ -86,6 +86,26 @@ class ApiService {
         }
     }
 
+    async getAnnualIncome() {
+        try {
+            const response = await this.api.get('/api/user/annual-income');
+            return response.data;
+        } catch (error) {
+            console.error('Annual income fetch error:', error);
+            return 0.00;
+        }
+    }
+
+    async getAnnualOutgoings() {
+        try {
+            const response = await this.api.get('/api/user/annual-outgoings');
+            return response.data;
+        } catch (error) {
+            console.error('Annual outgoings fetch error:', error);
+            return 0.00;
+        }
+    }
+
     async getMonthlyBudget(year, month) {
         try {
             const response = await this.api.get(`/api/user/budget/${year}/${month}`);

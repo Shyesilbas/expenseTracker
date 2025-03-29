@@ -8,6 +8,10 @@ function Dashboard() {
     const [annualBudget, setAnnualBudget] = useState(null);
     const [monthlyCategorySummary, setMonthlyCategorySummary] = useState({});
     const [annualCategorySummary, setAnnualCategorySummary] = useState({});
+    const [currentMonthlyIncome, setCurrentMonthlyIncome] = useState(0);
+    const [currentMonthlyOutgoings, setCurrentMonthlyOutgoings] = useState(0);
+    const [annualIncome, setAnnualIncome] = useState(0);  // New state for annual income
+    const [annualOutgoings, setAnnualOutgoings] = useState(0);  // New state for annual outgoings
 
     useEffect(() => {
         let mounted = true;
@@ -19,6 +23,10 @@ function Dashboard() {
                 const annualBudgetData = await apiService.getAnnualBudget();
                 const monthlySummaryData = await apiService.getCurrentMonthCategorySummary();
                 const annualSummaryData = await apiService.getCurrentYearCategorySummary();
+                const currentMonthlyIncome = await apiService.getCurrentMonthlyIncome();
+                const currentMonthlyOutgoings = await apiService.getCurrentMonthlyOutgoings();
+                const annualIncomeData = await apiService.getAnnualIncome();  // Fetch annual income
+                const annualOutgoingsData = await apiService.getAnnualOutgoings();  // Fetch annual outgoings
 
                 if (mounted) {
                     setUser(userData);
@@ -26,6 +34,10 @@ function Dashboard() {
                     setAnnualBudget(annualBudgetData);
                     setMonthlyCategorySummary(monthlySummaryData);
                     setAnnualCategorySummary(annualSummaryData);
+                    setCurrentMonthlyIncome(currentMonthlyIncome);
+                    setCurrentMonthlyOutgoings(currentMonthlyOutgoings);
+                    setAnnualIncome(annualIncomeData);  // Set annual income state
+                    setAnnualOutgoings(annualOutgoingsData);  // Set annual outgoings state
                 }
             } catch (err) {
                 console.error('Failed to fetch data:', err);
@@ -75,6 +87,20 @@ function Dashboard() {
                             {monthlyBudget !== null ? `${monthlyBudget} USD` : 'Loading...'}
                         </span>
                     </div>
+                    <div className="sub-cards">
+                        <div className="income-card">
+                            <h3>Income</h3>
+                            <span className={currentMonthlyIncome >= 0 ? 'positive' : 'negative'}>
+                                {currentMonthlyIncome !== null ? `${currentMonthlyIncome} USD` : 'Loading...'}
+                            </span>
+                        </div>
+                        <div className="outgoings-card">
+                            <h3>Outgoings</h3>
+                            <span className={currentMonthlyOutgoings >= 0 ? 'negative' : 'positive'}>
+                                {currentMonthlyOutgoings !== null ? `${currentMonthlyOutgoings} USD` : 'Loading...'}
+                            </span>
+                        </div>
+                    </div>
                     <div className="category-summary">
                         <h3>Category Breakdown</h3>
                         {Object.keys(monthlyCategorySummary).length > 0 ? (
@@ -95,6 +121,20 @@ function Dashboard() {
                         <span className={annualBudget < 0 ? 'negative' : 'positive'}>
                             {annualBudget !== null ? `${annualBudget} USD` : 'Loading...'}
                         </span>
+                    </div>
+                    <div className="sub-cards">
+                        <div className="income-card">
+                            <h3>Income</h3>
+                            <span className={annualIncome >= 0 ? 'positive' : 'negative'}>
+                                {annualIncome !== null ? `${annualIncome} USD` : 'Loading...'}
+                            </span>
+                        </div>
+                        <div className="outgoings-card">
+                            <h3>Outgoings</h3>
+                            <span className={annualOutgoings >= 0 ? 'negative' : 'positive'}>
+                                {annualOutgoings !== null ? `${annualOutgoings} USD` : 'Loading...'}
+                            </span>
+                        </div>
                     </div>
                     <div className="category-summary">
                         <h3>Category Breakdown</h3>
