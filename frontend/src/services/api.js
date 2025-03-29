@@ -76,6 +76,7 @@ class ApiService {
             return {};
         }
     }
+
     async getAnnualBudget() {
         try {
             const response = await this.api.get('/api/user/annual-budget');
@@ -146,7 +147,6 @@ class ApiService {
         }
     }
 
-
     async getMonthlyOutgoings(year, month) {
         try {
             const response = await this.api.get(`/api/user/outgoings/${year}/${month}`);
@@ -156,7 +156,6 @@ class ApiService {
             return 0.00;
         }
     }
-
 
     // Expense APIs
     async createExpense(data) {
@@ -186,36 +185,17 @@ class ApiService {
         }
     }
 
-    async getExpensesByCategory(category) {
+    async getExpensesByFilters({ year, month, category, status, currency, date }) {
         try {
-            const response = await this.api.get(`/api/expenses/category?category=${category}`);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    }
+            const params = {};
+            if (year) params.year = year;
+            if (month) params.month = month;
+            if (category) params.category = category;
+            if (status) params.status = status;
+            if (currency) params.currency = currency;
+            if (date) params.date = date;
 
-    async getExpensesByStatus(status) {
-        try {
-            const response = await this.api.get(`/api/expenses/status?status=${status}`);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    }
-
-    async getExpensesByCurrency(currency) {
-        try {
-            const response = await this.api.get(`/api/expenses/currency?currency=${currency}`);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    }
-
-    async getExpensesByDate(date) {
-        try {
-            const response = await this.api.get(`/api/expenses/date?date=${date}`);
+            const response = await this.api.get('/api/expenses/filter', { params });
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -279,6 +259,60 @@ class ApiService {
     async getSavingsByCurrency(currency) {
         try {
             const response = await this.api.get(`/api/savings/byCurrency?currency=${currency}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async convertUsdToTry(amount) {
+        try {
+            const response = await this.api.get('/api/currency/usd-to-try', { params: { amount } });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async convertUsdToEur(amount) {
+        try {
+            const response = await this.api.get('/api/currency/usd-to-eur', { params: { amount } });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async convertEurToTry(amount) {
+        try {
+            const response = await this.api.get('/api/currency/eur-to-try', { params: { amount } });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async convertEurToUsd(amount) {
+        try {
+            const response = await this.api.get('/api/currency/eur-to-usd', { params: { amount } });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async convertTryToUsd(amount) {
+        try {
+            const response = await this.api.get('/api/currency/try-to-usd', { params: { amount } });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async convertTryToEur(amount) {
+        try {
+            const response = await this.api.get('/api/currency/try-to-eur', { params: { amount } });
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

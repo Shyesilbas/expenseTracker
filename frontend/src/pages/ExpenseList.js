@@ -4,12 +4,13 @@ import ExpensePieChart from '../components/ExpensePieChart';
 import '../styles/ExpenseList.css';
 
 function ExpenseList() {
+    const currentDate = new Date();
     const [expenses, setExpenses] = useState([]);
     const [monthlyBudget, setMonthlyBudget] = useState(null);
     const [totalIncome, setTotalIncome] = useState(0.00);
     const [totalSpent, setTotalSpent] = useState(0.00);
-    const [year, setYear] = useState(new Date().getFullYear());
-    const [month, setMonth] = useState(new Date().getMonth() + 1);
+    const [year, setYear] = useState(currentDate.getFullYear());
+    const [month, setMonth] = useState(currentDate.getMonth() + 1);
     const [category, setCategory] = useState('');
     const [status, setStatus] = useState('');
     const [currency, setCurrency] = useState('');
@@ -33,24 +34,16 @@ function ExpenseList() {
             setTotalIncome(income);
             setTotalSpent(spent);
 
-            let expenseData = await apiService.getMonthlyExpenses(year, month);
+            const filters = {
+                year,
+                month,
+                category: category || undefined,
+                status: status || undefined,
+                currency: currency || undefined,
+                date: date || undefined,
+            };
 
-            if (category) {
-                expenseData = await apiService.getExpensesByCategory(category);
-            }
-
-            if (status) {
-                expenseData = await apiService.getExpensesByStatus(status);
-            }
-
-            if (currency) {
-                expenseData = await apiService.getExpensesByCurrency(currency);
-            }
-
-            if (date) {
-                expenseData = await apiService.getExpensesByDate(date);
-            }
-
+            const expenseData = await apiService.getExpensesByFilters(filters);
             setExpenses(expenseData);
         } catch (error) {
             console.error('Failed to fetch data:', error);
@@ -82,7 +75,7 @@ function ExpenseList() {
         };
 
         const updateData = {
-            id: expenseId, // Match the backend's UpdateExpenseRequest "id"
+            id: expenseId,
             amount: editForm.amount ? Number(editForm.amount) : undefined,
             currency: editForm.currency || undefined,
             status: editForm.status || undefined,
@@ -107,13 +100,13 @@ function ExpenseList() {
     };
 
     const startEditing = (expense) => {
-        setEditingExpenseId(expense.expenseId); // Use expenseId from backend
+        setEditingExpenseId(expense.expenseId);
         setEditForm({
             amount: expense.amount || '',
             currency: expense.currency || '',
             status: expense.status || '',
             category: expense.category || '',
-            date: expense.date.split('.').reverse().join('-') || '', // Convert dd.MM.yyyy to yyyy-MM-dd
+            date: expense.date.split('.').reverse().join('-') || '',
         });
     };
 
@@ -154,7 +147,7 @@ function ExpenseList() {
 
     return (
         <div className="expense-list-container">
-            <h1>All Transactions</h1>
+            <h1>All Transactions - {new Date(year, month - 1).toLocaleString('en', { month: 'long', year: 'numeric' })}</h1>
 
             <div className="filters">
                 <select value={year} onChange={handleYearChange} className="modern-select">

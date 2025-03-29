@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Register from './pages/Register';
 import ExpenseList from './pages/ExpenseList';
 import SavingsPage from './pages/SavingsPage';
+import CurrencyConversion from './pages/CurrencyConversion';
 import ExpenseForm from './pages/ExpenseForm';
 import Sidebar from './components/Sidebar';
 import React, { useState, useEffect } from 'react';
@@ -66,6 +67,7 @@ function App() {
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/savings" element={<SavingsPage />} />
                     <Route path="/expenses" element={<ExpenseList />} />
+                    <Route path="/currency/convert" element={<CurrencyConversion />} />
                     <Route path="/expenses/add" element={<ExpenseForm />} />
                 </Routes>
             </div>

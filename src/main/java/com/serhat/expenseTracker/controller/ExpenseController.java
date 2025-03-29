@@ -32,8 +32,8 @@ public class ExpenseController {
 
     @GetMapping()
     public ResponseEntity<List<ExpenseDto>> getExpenses() {
-        List<ExpenseDto> expense = expenseService.getExpenses();
-        return ResponseEntity.ok(expense);
+        List<ExpenseDto> expenses = expenseService.getExpenses();
+        return ResponseEntity.ok(expenses);
     }
 
     @GetMapping("/monthly")
@@ -57,14 +57,20 @@ public class ExpenseController {
     }
 
     @GetMapping("/category")
-    public ResponseEntity<List<ExpenseDto>> getExpensesByCategory(@RequestParam Category category) {
-        List<ExpenseDto> expenses = expenseService.findExpensesByCategory(category);
+    public ResponseEntity<List<ExpenseDto>> getExpensesByCategory(
+            @RequestParam Category category,
+            @RequestParam int year,
+            @RequestParam int month) {
+        List<ExpenseDto> expenses = expenseService.findExpensesByCategory(category, year, month);
         return ResponseEntity.ok(expenses);
     }
 
     @GetMapping("/status")
-    public ResponseEntity<List<ExpenseDto>> getExpensesByStatus(@RequestParam Status status) {
-        List<ExpenseDto> expenses = expenseService.findExpensesByStatus(status);
+    public ResponseEntity<List<ExpenseDto>> getExpensesByStatus(
+            @RequestParam Status status,
+            @RequestParam int year,
+            @RequestParam int month) {
+        List<ExpenseDto> expenses = expenseService.findExpensesByStatus(status, year, month);
         return ResponseEntity.ok(expenses);
     }
 
@@ -84,8 +90,11 @@ public class ExpenseController {
     }
 
     @GetMapping("/currency")
-    public ResponseEntity<List<ExpenseDto>> getExpensesByCurrency(@RequestParam Currency currency) {
-        List<ExpenseDto> expenses = expenseService.findExpensesByCurrency(currency);
+    public ResponseEntity<List<ExpenseDto>> getExpensesByCurrency(
+            @RequestParam Currency currency,
+            @RequestParam int year,
+            @RequestParam int month) {
+        List<ExpenseDto> expenses = expenseService.findExpensesByCurrency(currency, year, month);
         return ResponseEntity.ok(expenses);
     }
 
@@ -94,6 +103,7 @@ public class ExpenseController {
         Map<Category, CategorySummary> summary = expenseService.getCurrentMonthCategorySummary();
         return ResponseEntity.ok(summary);
     }
+
     @GetMapping("/current-year-category-summary")
     public ResponseEntity<Map<Category, CategorySummary>> getCurrentYearCategorySummary() {
         Map<Category, CategorySummary> summary = expenseService.getCurrentYearCategorySummary();
@@ -102,8 +112,23 @@ public class ExpenseController {
 
     @GetMapping("/date")
     public ResponseEntity<List<ExpenseDto>> getExpensesByDate(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        List<ExpenseDto> expenses = expenseService.findByDate(date);
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam int year,
+            @RequestParam int month) {
+        List<ExpenseDto> expenses = expenseService.findByDate(date, year, month);
+        return ResponseEntity.ok(expenses);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<ExpenseDto>> getExpensesByFilters(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Category category,
+            @RequestParam(required = false) Status status,
+            @RequestParam(required = false) Currency currency,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        List<ExpenseDto> expenses = expenseService.findExpensesByFilters(year, month, category, status, currency, date);
         return ResponseEntity.ok(expenses);
     }
 }

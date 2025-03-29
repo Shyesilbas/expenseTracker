@@ -85,14 +85,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     public List<ExpenseDto> findExpensesByMonth(int year, int month) {
-        AppUser user = currentUser();
-        LocalDate startDate = YearMonth.of(year, month).atDay(1);
-        LocalDate endDate = YearMonth.of(year, month).atEndOfMonth();
-
-        return expenseRepository.findByUserAndDateBetween(user, startDate, endDate)
-                .stream()
-                .map(expenseMapper::toExpenseDto)
-                .toList();
+        return findExpensesByFilters(year, month, null, null, null, null);
     }
 
     @Override
@@ -134,39 +127,23 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
-    public List<ExpenseDto> findExpensesByCategory(Category category) {
-        AppUser user = currentUser();
-        return expenseRepository.findExpensesByUserAndCategory(user, category)
-                .stream()
-                .map(expenseMapper::toExpenseDto)
-                .toList();
+    public List<ExpenseDto> findExpensesByCategory(Category category, int year, int month) {
+        return findExpensesByFilters(year, month, category, null, null, null);
     }
 
     @Override
-    public List<ExpenseDto> findExpensesByStatus(Status status) {
-        AppUser user = currentUser();
-        return expenseRepository.findExpensesByUserAndStatus(user, status)
-                .stream()
-                .map(expenseMapper::toExpenseDto)
-                .toList();
+    public List<ExpenseDto> findExpensesByStatus(Status status, int year, int month) {
+        return findExpensesByFilters(year, month, null, status, null, null);
     }
 
     @Override
-    public List<ExpenseDto> findExpensesByCurrency(Currency currency) {
-        AppUser user = currentUser();
-        return expenseRepository.findExpensesByUserAndCurrency(user, currency)
-                .stream()
-                .map(expenseMapper::toExpenseDto)
-                .toList();
+    public List<ExpenseDto> findExpensesByCurrency(Currency currency, int year, int month) {
+        return findExpensesByFilters(year, month, null, null, currency, null);
     }
 
     @Override
-    public List<ExpenseDto> findByDate(LocalDate date) {
-        AppUser user = currentUser();
-        return expenseRepository.findExpensesByUserAndDate(user, date)
-                .stream()
-                .map(expenseMapper::toExpenseDto)
-                .toList();
+    public List<ExpenseDto> findByDate(LocalDate date, int year, int month) {
+        return findExpensesByFilters(year, month, null, null, null, date);
     }
 
     @Override
@@ -194,13 +171,13 @@ public class ExpenseServiceImpl implements ExpenseService {
                 ));
     }
 
+    @Override
     public Map<Category, CategorySummary> getCurrentYearCategorySummary() {
         AppUser user = currentUser();
         LocalDate now = LocalDate.now();
-        LocalDate startDate = LocalDate.of(now.getYear(), 1, 1); // Start of the year
-        LocalDate endDate = now;
+        LocalDate startDate = LocalDate.of(now.getYear(), 1, 1);
 
-        List<Expense> expenses = expenseRepository.findByUserAndDateBetween(user, startDate, endDate);
+        List<Expense> expenses = expenseRepository.findByUserAndDateBetween(user, startDate, now);
 
         return expenses.stream()
                 .collect(Collectors.groupingBy(
@@ -216,5 +193,48 @@ public class ExpenseServiceImpl implements ExpenseService {
                                 )
                         )
                 ));
+    }
+
+    @Override
+    public List<ExpenseDto> findExpensesByFilters(
+            Integer year,
+            Integer month,
+            Category category,
+            Status status,
+            Currency currency,
+            LocalDate date
+    ) {
+        AppUser user = currentUser();
+
+        // Varsayılan olarak tüm verileri getir, eğer year ve month yoksa tüm zamanları kapsar
+        LocalDate startDate = (year != null && month != null) ? YearMonth.of(year, month).atDay(1) : LocalDate.of(1970, 1, 1);
+        LocalDate endDate = (year != null && month != null) ? YearMonth.of(year, month).atEndOfMonth() : LocalDate.now();
+
+        List<Expense> expenses = expenseRepository.findByUserAndDateBetween(user, startDate, endDate);
+
+        // Filtreleme işlemleri
+        if (category != null) {
+            expenses = expenses.stream()
+                    .filter(expense -> expense.getCategory() == category)
+                    .collect(Collectors.toList());
+        }
+        if (status != null) {
+            expenses = expenses.stream()
+                    .filter(expense -> expense.getStatus() == status)
+                    .collect(Collectors.toList());
+        }
+        if (currency != null) {
+            expenses = expenses.stream()
+                    .filter(expense -> expense.getCurrency() == currency)
+                    .collect(Collectors.toList());
+        }
+        if (date != null) {
+            expenses = expenses.stream()
+                    .filter(expense -> expense.getDate().equals(date))
+                    .collect(Collectors.toList());
+        }
+
+        return expenses.isEmpty() ? Collections.emptyList() :
+                expenses.stream().map(expenseMapper::toExpenseDto).toList();
     }
 }
