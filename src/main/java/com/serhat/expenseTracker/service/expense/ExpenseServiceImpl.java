@@ -76,31 +76,6 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
-    public List<ExpenseDto> getExpenses() {
-        AppUser user = currentUser();
-        List<Expense> userExpenses = expenseRepository.findByUser(user);
-        return userExpenses.isEmpty() ? Collections.emptyList() :
-                userExpenses.stream().map(expenseMapper::toExpenseDto).toList();
-    }
-
-    @Override
-    public List<ExpenseDto> findExpensesByMonth(int year, int month) {
-        return findExpensesByFilters(year, month, null, null, null, null);
-    }
-
-    @Override
-    public List<ExpenseDto> findExpensesByYear(int year) {
-        AppUser user = currentUser();
-        LocalDate startDate = LocalDate.of(year, 1, 1);
-        LocalDate endDate = LocalDate.of(year, 12, 31);
-
-        return expenseRepository.findByUserAndDateBetween(user, startDate, endDate)
-                .stream()
-                .map(expenseMapper::toExpenseDto)
-                .toList();
-    }
-
-    @Override
     public ExpenseDto createExpense(ExpenseRequest expenseRequest) {
         AppUser user = currentUser();
         Expense expense = Expense.builder()
@@ -125,27 +100,6 @@ public class ExpenseServiceImpl implements ExpenseService {
 
         return expenseMapper.toExpenseDto(expense);
     }
-
-    @Override
-    public List<ExpenseDto> findExpensesByCategory(Category category, int year, int month) {
-        return findExpensesByFilters(year, month, category, null, null, null);
-    }
-
-    @Override
-    public List<ExpenseDto> findExpensesByStatus(Status status, int year, int month) {
-        return findExpensesByFilters(year, month, null, status, null, null);
-    }
-
-    @Override
-    public List<ExpenseDto> findExpensesByCurrency(Currency currency, int year, int month) {
-        return findExpensesByFilters(year, month, null, null, currency, null);
-    }
-
-    @Override
-    public List<ExpenseDto> findByDate(LocalDate date, int year, int month) {
-        return findExpensesByFilters(year, month, null, null, null, date);
-    }
-
     @Override
     public Map<Category, CategorySummary> getCurrentMonthCategorySummary() {
         AppUser user = currentUser();
@@ -206,13 +160,11 @@ public class ExpenseServiceImpl implements ExpenseService {
     ) {
         AppUser user = currentUser();
 
-        // Varsayılan olarak tüm verileri getir, eğer year ve month yoksa tüm zamanları kapsar
         LocalDate startDate = (year != null && month != null) ? YearMonth.of(year, month).atDay(1) : LocalDate.of(1970, 1, 1);
         LocalDate endDate = (year != null && month != null) ? YearMonth.of(year, month).atEndOfMonth() : LocalDate.now();
 
         List<Expense> expenses = expenseRepository.findByUserAndDateBetween(user, startDate, endDate);
 
-        // Filtreleme işlemleri
         if (category != null) {
             expenses = expenses.stream()
                     .filter(expense -> expense.getCategory() == category)

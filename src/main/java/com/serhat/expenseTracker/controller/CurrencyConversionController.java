@@ -16,33 +16,8 @@ public class CurrencyConversionController {
         this.conversionService = conversionService;
     }
 
-    @GetMapping("/usd-to-try")
-    public double usdToTry(@RequestParam double amount) {
-        return conversionService.convertCurrency("USD", "TRY", amount);
-    }
-
-    @GetMapping("/usd-to-eur")
-    public double usdToEur(@RequestParam double amount) {
-        return conversionService.convertCurrency("USD", "EUR", amount);
-    }
-
-    @GetMapping("/eur-to-try")
-    public double eurToTry(@RequestParam double amount) {
-        return conversionService.convertCurrency("EUR", "TRY", amount);
-    }
-
-    @GetMapping("/eur-to-usd")
-    public double eurToUsd(@RequestParam double amount) {
-        return conversionService.convertCurrency("EUR", "USD", amount);
-    }
-
-    @GetMapping("/try-to-usd")
-    public double tryToUsd(@RequestParam double amount) {
-        return conversionService.convertCurrency("TRY", "USD", amount);
-    }
-
-    @GetMapping("/try-to-eur")
-    public double tryToEur(@RequestParam double amount) {
-        return conversionService.convertCurrency("TRY", "EUR", amount);
+    @GetMapping("/convert")
+    public double convertCurrency(@RequestParam String from, @RequestParam String to, @RequestParam double amount) {
+        return conversionService.convertCurrency(from, to, amount);
     }
 }

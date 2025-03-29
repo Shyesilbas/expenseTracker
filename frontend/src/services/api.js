@@ -167,24 +167,6 @@ class ApiService {
         }
     }
 
-    async getExpenses() {
-        try {
-            const response = await this.api.get('/api/expenses');
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    }
-
-    async getMonthlyExpenses(year, month) {
-        try {
-            const response = await this.api.get(`/api/expenses/monthly?year=${year}&month=${month}`);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    }
-
     async getExpensesByFilters({ year, month, category, status, currency, date }) {
         try {
             const params = {};
@@ -256,68 +238,17 @@ class ApiService {
         }
     }
 
-    async getSavingsByCurrency(currency) {
+    async convertCurrency(from, to, amount) {
         try {
-            const response = await this.api.get(`/api/savings/byCurrency?currency=${currency}`);
+            const response = await this.api.get('/api/currency/convert', {
+                params: { from, to, amount }
+            });
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
         }
     }
 
-    async convertUsdToTry(amount) {
-        try {
-            const response = await this.api.get('/api/currency/usd-to-try', { params: { amount } });
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    }
-
-    async convertUsdToEur(amount) {
-        try {
-            const response = await this.api.get('/api/currency/usd-to-eur', { params: { amount } });
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    }
-
-    async convertEurToTry(amount) {
-        try {
-            const response = await this.api.get('/api/currency/eur-to-try', { params: { amount } });
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    }
-
-    async convertEurToUsd(amount) {
-        try {
-            const response = await this.api.get('/api/currency/eur-to-usd', { params: { amount } });
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    }
-
-    async convertTryToUsd(amount) {
-        try {
-            const response = await this.api.get('/api/currency/try-to-usd', { params: { amount } });
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    }
-
-    async convertTryToEur(amount) {
-        try {
-            const response = await this.api.get('/api/currency/try-to-eur', { params: { amount } });
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    }
 }
 
 export default new ApiService();

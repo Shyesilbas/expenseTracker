@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import apiService from '../services/api';
-import ExpensePieChart from '../components/ExpensePieChart';
+import PieChart from '../components/PieChart';
 import '../styles/ExpenseList.css';
+import _ from 'lodash';
 
 function ExpenseList() {
     const currentDate = new Date();
@@ -9,12 +10,14 @@ function ExpenseList() {
     const [monthlyBudget, setMonthlyBudget] = useState(null);
     const [totalIncome, setTotalIncome] = useState(0.00);
     const [totalSpent, setTotalSpent] = useState(0.00);
-    const [year, setYear] = useState(currentDate.getFullYear());
-    const [month, setMonth] = useState(currentDate.getMonth() + 1);
-    const [category, setCategory] = useState('');
-    const [status, setStatus] = useState('');
-    const [currency, setCurrency] = useState('');
-    const [date, setDate] = useState('');
+    const [filters, setFilters] = useState({
+        year: currentDate.getFullYear(),
+        month: currentDate.getMonth() + 1,
+        category: '',
+        status: '',
+        currency: '',
+        date: '',
+    });
     const [editingExpenseId, setEditingExpenseId] = useState(null);
     const [editForm, setEditForm] = useState({
         amount: '',
@@ -23,9 +26,14 @@ function ExpenseList() {
         category: '',
         date: '',
     });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        setError(null);
         try {
+            const { year, month } = filters;
             const budget = await apiService.getMonthlyBudget(year, month);
             const income = await apiService.getMonthlyIncome(year, month);
             const spent = await apiService.getMonthlyOutgoings(year, month);
@@ -34,25 +42,36 @@ function ExpenseList() {
             setTotalIncome(income);
             setTotalSpent(spent);
 
-            const filters = {
-                year,
-                month,
-                category: category || undefined,
-                status: status || undefined,
-                currency: currency || undefined,
-                date: date || undefined,
+            const apiFilters = {
+                ...filters,
+                category: filters.category || undefined,
+                status: filters.status || undefined,
+                currency: filters.currency || undefined,
+                date: filters.date || undefined,
             };
 
-            const expenseData = await apiService.getExpensesByFilters(filters);
+            const expenseData = await apiService.getExpensesByFilters(apiFilters);
             setExpenses(expenseData);
-        } catch (error) {
-            console.error('Failed to fetch data:', error);
+        } catch (err) {
+            console.error('Failed to fetch data:', err);
+            setError('Failed to load data. Please try again.');
+        } finally {
+            setLoading(false);
         }
-    };
+    }, [filters]);
+
+    // Create a debounced version of fetchData
+    const debouncedFetchData = useCallback(_.debounce(() => {
+        fetchData();
+    }, 300), [fetchData]);
 
     useEffect(() => {
-        fetchData();
-    }, [year, month, category, status, currency, date]);
+        debouncedFetchData();
+        // Cleanup function to cancel any pending debounced calls when filters change again or component unmounts
+        return () => {
+            debouncedFetchData.cancel();
+        };
+    }, [debouncedFetchData]);
 
     const handleDeleteExpense = async (expenseId) => {
         if (!expenseId || isNaN(expenseId)) {
@@ -86,13 +105,7 @@ function ExpenseList() {
         try {
             await apiService.updateExpense(expenseId, updateData);
             setEditingExpenseId(null);
-            setEditForm({
-                amount: '',
-                currency: '',
-                status: '',
-                category: '',
-                date: '',
-            });
+            setEditForm({ amount: '', currency: '', status: '', category: '', date: '' });
             fetchData();
         } catch (error) {
             console.error('Error updating expense:', error);
@@ -112,80 +125,72 @@ function ExpenseList() {
 
     const cancelEditing = () => {
         setEditingExpenseId(null);
-        setEditForm({
-            amount: '',
-            currency: '',
-            status: '',
-            category: '',
-            date: '',
-        });
+        setEditForm({ amount: '', currency: '', status: '', category: '', date: '' });
     };
 
-    const handleYearChange = (e) => {
-        setYear(parseInt(e.target.value));
-        resetFilters();
-    };
-
-    const handleMonthChange = (e) => {
-        setMonth(parseInt(e.target.value));
-        resetFilters();
-    };
-
-    const resetFilters = () => {
-        setCategory('');
-        setStatus('');
-        setCurrency('');
-        setDate('');
-    };
+    // Use debounced version for filter changes
+    const handleFilterChange = useCallback((e) => {
+        const { name, value } = e.target;
+        setFilters(prev => ({
+            ...prev,
+            [name]: value,
+            ...(name === 'year' || name === 'month' ? { category: '', status: '', currency: '', date: '' } : {}),
+        }));
+    }, []);
 
     const categories = [
         '', 'SHOPPING', 'RENT', 'INVESTMENT', 'EDUCATION', 'DEBT_PAYMENT', 'SALARY',
         'TRAVEL', 'OTHER', 'BET', 'TELECOMMUNICATION', 'TRANSPORTATION', 'TAX'
     ];
     const statuses = ['', 'INCOME', 'OUTGOING'];
-    const currencies = ['', 'USD', 'EUR', 'TL'];
+    const currencies = ['', 'USD', 'EUR', 'TL' , 'GBP'];
 
     return (
         <div className="expense-list-container">
-            <h1>All Transactions - {new Date(year, month - 1).toLocaleString('en', { month: 'long', year: 'numeric' })}</h1>
+            <h1>All Transactions - {new Date(filters.year, filters.month - 1).toLocaleString('en', { month: 'long', year: 'numeric' })}</h1>
 
             <div className="filters">
-                <select value={year} onChange={handleYearChange} className="modern-select">
+                <select name="year" value={filters.year} onChange={handleFilterChange} className="modern-select">
                     {[...Array(101).keys()].map(i => {
                         const yearOption = 2020 + i;
                         return <option key={yearOption} value={yearOption}>{yearOption}</option>;
                     })}
                 </select>
-                <select value={month} onChange={handleMonthChange} className="modern-select">
-                    {Array.from({length: 12}, (_, i) => i + 1).map(m => (
+                <select name="month" value={filters.month} onChange={handleFilterChange} className="modern-select">
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
                         <option key={m} value={m}>
-                            {new Date(0, m - 1).toLocaleString('en', {month: 'long'})}
+                            {new Date(0, m - 1).toLocaleString('en', { month: 'long' })}
                         </option>
                     ))}
                 </select>
-                <select value={category} onChange={(e) => setCategory(e.target.value)} className="modern-select">
+                <select name="category" value={filters.category} onChange={handleFilterChange} className="modern-select">
                     {categories.map(cat => (
                         <option key={cat} value={cat}>{cat || 'All Categories'}</option>
                     ))}
                 </select>
-                <select value={status} onChange={(e) => setStatus(e.target.value)} className="modern-select">
+                <select name="status" value={filters.status} onChange={handleFilterChange} className="modern-select">
                     {statuses.map(stat => (
                         <option key={stat} value={stat}>{stat || 'All Statuses'}</option>
                     ))}
                 </select>
-                <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="modern-select">
+                <select name="currency" value={filters.currency} onChange={handleFilterChange} className="modern-select">
                     {currencies.map(curr => (
                         <option key={curr} value={curr}>{curr || 'All Currencies'}</option>
                     ))}
                 </select>
                 <input
                     type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
+                    name="date"
+                    value={filters.date}
+                    onChange={handleFilterChange}
                     className="modern-select"
                 />
-                <button onClick={fetchData} className="fetch-btn">Refresh</button>
+                <button onClick={() => fetchData()} className="fetch-btn" disabled={loading}>
+                    {loading ? 'Loading...' : 'Refresh'}
+                </button>
             </div>
+
+            {error && <p className="error-message">{error}</p>}
 
             <div className="budget-status">
                 <span className="budget-label">Monthly Budget Status: </span>
@@ -208,7 +213,9 @@ function ExpenseList() {
             </div>
 
             <div className="expense-table-container">
-                {expenses.length === 0 ? (
+                {loading ? (
+                    <p className="loading-message">Loading expenses...</p>
+                ) : expenses.length === 0 ? (
                     <p className="no-data">No expenses found for this period.</p>
                 ) : (
                     <table className="expense-table">
@@ -324,11 +331,11 @@ function ExpenseList() {
             <div className="chart-container-wrapper">
                 <div className="chart-container">
                     <h2>Expense Distribution by Category</h2>
-                    <ExpensePieChart expenses={expenses.filter(exp => exp.status === 'OUTGOING')}/>
+                    <PieChart data={expenses.filter(exp => exp.status === 'OUTGOING')} title="Expenses" />
                 </div>
                 <div className="chart-container">
                     <h2>Income Distribution by Category</h2>
-                    <ExpensePieChart expenses={expenses.filter(exp => exp.status === 'INCOME')}/>
+                    <PieChart data={expenses.filter(exp => exp.status === 'INCOME')} title="Income" />
                 </div>
             </div>
         </div>

@@ -30,48 +30,10 @@ public class ExpenseController {
         return ResponseEntity.ok(createdExpense);
     }
 
-    @GetMapping()
-    public ResponseEntity<List<ExpenseDto>> getExpenses() {
-        List<ExpenseDto> expenses = expenseService.getExpenses();
-        return ResponseEntity.ok(expenses);
-    }
-
-    @GetMapping("/monthly")
-    public ResponseEntity<List<ExpenseDto>> getMonthlyExpenses(
-            @RequestParam int year,
-            @RequestParam int month) {
-        List<ExpenseDto> expenses = expenseService.findExpensesByMonth(year, month);
-        return ResponseEntity.ok(expenses);
-    }
-
-    @GetMapping("/yearly")
-    public ResponseEntity<List<ExpenseDto>> getYearlyExpenses(@RequestParam int year) {
-        List<ExpenseDto> expenses = expenseService.findExpensesByYear(year);
-        return ResponseEntity.ok(expenses);
-    }
-
     @GetMapping("/{expenseId}")
     public ResponseEntity<ExpenseDto> getExpenseById(@PathVariable Long expenseId) {
         ExpenseDto expense = expenseService.findExpenseById(expenseId);
         return ResponseEntity.ok(expense);
-    }
-
-    @GetMapping("/category")
-    public ResponseEntity<List<ExpenseDto>> getExpensesByCategory(
-            @RequestParam Category category,
-            @RequestParam int year,
-            @RequestParam int month) {
-        List<ExpenseDto> expenses = expenseService.findExpensesByCategory(category, year, month);
-        return ResponseEntity.ok(expenses);
-    }
-
-    @GetMapping("/status")
-    public ResponseEntity<List<ExpenseDto>> getExpensesByStatus(
-            @RequestParam Status status,
-            @RequestParam int year,
-            @RequestParam int month) {
-        List<ExpenseDto> expenses = expenseService.findExpensesByStatus(status, year, month);
-        return ResponseEntity.ok(expenses);
     }
 
     @DeleteMapping("/delete/{expenseId}")
@@ -89,14 +51,6 @@ public class ExpenseController {
         return ResponseEntity.ok(expenseService.updateExpense(request));
     }
 
-    @GetMapping("/currency")
-    public ResponseEntity<List<ExpenseDto>> getExpensesByCurrency(
-            @RequestParam Currency currency,
-            @RequestParam int year,
-            @RequestParam int month) {
-        List<ExpenseDto> expenses = expenseService.findExpensesByCurrency(currency, year, month);
-        return ResponseEntity.ok(expenses);
-    }
 
     @GetMapping("/current-month-category-summary")
     public ResponseEntity<Map<Category, CategorySummary>> getCurrentMonthCategorySummary() {
@@ -108,15 +62,6 @@ public class ExpenseController {
     public ResponseEntity<Map<Category, CategorySummary>> getCurrentYearCategorySummary() {
         Map<Category, CategorySummary> summary = expenseService.getCurrentYearCategorySummary();
         return ResponseEntity.ok(summary);
-    }
-
-    @GetMapping("/date")
-    public ResponseEntity<List<ExpenseDto>> getExpensesByDate(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam int year,
-            @RequestParam int month) {
-        List<ExpenseDto> expenses = expenseService.findByDate(date, year, month);
-        return ResponseEntity.ok(expenses);
     }
 
     @GetMapping("/filter")

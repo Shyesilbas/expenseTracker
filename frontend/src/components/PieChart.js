@@ -4,29 +4,43 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const IncomePieChart = ({ incomes }) => {
-    const categoryData = incomes.reduce((acc, income) => {
-        const category = income.category || 'Uncategorized';
-        acc[category] = (acc[category] || 0) + parseFloat(income.amount);
+const categoryColors = {
+    'SHOPPING': '#FF6384',
+    'RENT': '#36A2EB',
+    'INVESTMENT': '#FFCE56',
+    'EDUCATION': '#4BC0C0',
+    'DEBT_PAYMENT': '#9966FF',
+    'SALARY': '#FF9F40',
+    'TRAVEL': '#E7E9ED',
+    'OTHER': '#C9CBCE',
+    'BET': '#F7464A',
+    'TELECOMMUNICATION': '#46BFBD',
+    'TRANSPORTATION': '#FDB45C',
+    'TAX': '#949FB1',
+    'Uncategorized': '#D3D3D3'
+};
+
+const PieChart = ({ data, title }) => {
+    const categoryData = data.reduce((acc, item) => {
+        const category = item.category || 'Uncategorized';
+        acc[category] = (acc[category] || 0) + parseFloat(item.amount);
         return acc;
     }, {});
 
     const labels = Object.keys(categoryData);
     const dataValues = Object.values(categoryData);
 
-    const data = {
+    const backgroundColors = labels.map(label => categoryColors[label] || '#D3D3D3');
+
+    const chartData = {
         labels: labels,
         datasets: [
             {
                 data: dataValues,
-                backgroundColor: [
-                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-                    '#FF9F40', '#E7E9ED', '#C9CBCE', '#F7464A', '#46BFBD',
-                    '#FDB45C', '#949FB1'
-                ].slice(0, labels.length),
+                backgroundColor: backgroundColors,
                 borderColor: '#ffffff',
                 borderWidth: 2,
-                hoverOffset: 8, // Adds a slight pop-out effect on hover
+                hoverOffset: 8,
             },
         ],
     };
@@ -72,12 +86,12 @@ const IncomePieChart = ({ incomes }) => {
     return (
         <div className="pie-chart-wrapper">
             {labels.length > 0 ? (
-                <Pie data={data} options={options} />
+                <Pie data={chartData} options={options} />
             ) : (
-                <p className="no-chart-data">No incoming income to display</p>
+                <p className="no-chart-data">No data to display for {title}</p>
             )}
         </div>
     );
 };
 
-export default IncomePieChart;
+export default PieChart;

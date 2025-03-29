@@ -29,6 +29,11 @@ public class UserController {
         BigDecimal monthlyOutgoings = userService.monthlyOutgoings();
         return ResponseEntity.ok(monthlyOutgoings);
     }
+    @GetMapping("/monthly-budget")
+    public ResponseEntity<BigDecimal> getMonthlyBudgetStatus() {
+        BigDecimal budgetStatus = userService.getMonthlyBudgetStatus();
+        return ResponseEntity.ok(budgetStatus);
+    }
 
     @GetMapping("/annual-income")
     public ResponseEntity<BigDecimal> getAnnualIncome() {
@@ -40,12 +45,6 @@ public class UserController {
     public ResponseEntity<BigDecimal> getAnnualOutgoings() {
         BigDecimal monthlyOutgoings = userService.annualOutgoings();
         return ResponseEntity.ok(monthlyOutgoings);
-    }
-
-    @GetMapping("/monthly-budget")
-    public ResponseEntity<BigDecimal> getMonthlyBudgetStatus() {
-        BigDecimal budgetStatus = userService.getMonthlyBudgetStatus();
-        return ResponseEntity.ok(budgetStatus);
     }
 
     @GetMapping("/annual-budget")

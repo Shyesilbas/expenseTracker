@@ -40,29 +40,15 @@ public class CurrencyConversionService {
             throw new RuntimeException("Exchange rate not found for " + from + " or " + to);
         }
 
-        // Convert from -> EUR -> to
         double amountInEur = amount / fromRate;
         return amountInEur * toRate;
     }
 
+    @Setter
+    @Getter
     static class ExchangeRateResponse {
         private boolean success;
         private Map<String, Double> rates;
 
-        public boolean isSuccess() {
-            return success;
-        }
-
-        public Map<String, Double> getRates() {
-            return rates;
-        }
-
-        public void setSuccess(boolean success) {
-            this.success = success;
-        }
-
-        public void setRates(Map<String, Double> rates) {
-            this.rates = rates;
-        }
     }
 }
