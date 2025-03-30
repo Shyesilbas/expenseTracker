@@ -51,16 +51,15 @@ public class ExpenseController {
         return ResponseEntity.ok(expenseService.updateExpense(request));
     }
 
-
     @GetMapping("/current-month-category-summary")
-    public ResponseEntity<Map<Category, CategorySummary>> getCurrentMonthCategorySummary() {
-        Map<Category, CategorySummary> summary = expenseService.getCurrentMonthCategorySummary();
+    public ResponseEntity<Map<Category, List<CategorySummary>>> getCurrentMonthCategorySummary() {
+        Map<Category, List<CategorySummary>> summary = expenseService.getCurrentMonthCategorySummary();
         return ResponseEntity.ok(summary);
     }
 
     @GetMapping("/current-year-category-summary")
-    public ResponseEntity<Map<Category, CategorySummary>> getCurrentYearCategorySummary() {
-        Map<Category, CategorySummary> summary = expenseService.getCurrentYearCategorySummary();
+    public ResponseEntity<Map<Category, List<CategorySummary>>> getCurrentYearCategorySummary() {
+        Map<Category, List<CategorySummary>> summary = expenseService.getCurrentYearCategorySummary();
         return ResponseEntity.ok(summary);
     }
 

@@ -14,9 +14,7 @@ import java.util.Map;
 public interface ExpenseService {
     ExpenseDto createExpense(ExpenseRequest expenseRequest);
     ExpenseDto findExpenseById(Long expenseId);
-
     ExpenseDto updateExpense(UpdateExpenseRequest request);
-
     List<ExpenseDto> findExpensesByFilters(
             Integer year,
             Integer month,
@@ -27,6 +25,6 @@ public interface ExpenseService {
     );
     String deleteExpense(Long expenseId);
 
-    Map<Category, CategorySummary> getCurrentMonthCategorySummary();
-    Map<Category, CategorySummary> getCurrentYearCategorySummary();
+    Map<Category, List<CategorySummary>> getCurrentMonthCategorySummary();
+    Map<Category, List<CategorySummary>> getCurrentYearCategorySummary();
 }

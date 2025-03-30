@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import apiService from '../services/api';
 import '../styles/Dashboard.css';
 
@@ -10,8 +11,9 @@ function Dashboard() {
     const [annualCategorySummary, setAnnualCategorySummary] = useState({});
     const [currentMonthlyIncome, setCurrentMonthlyIncome] = useState(0);
     const [currentMonthlyOutgoings, setCurrentMonthlyOutgoings] = useState(0);
-    const [annualIncome, setAnnualIncome] = useState(0);  // New state for annual income
-    const [annualOutgoings, setAnnualOutgoings] = useState(0);  // New state for annual outgoings
+    const [annualIncome, setAnnualIncome] = useState(0);
+    const [annualOutgoings, setAnnualOutgoings] = useState(0);
+    const navigate = useNavigate();
 
     useEffect(() => {
         let mounted = true;
@@ -25,8 +27,13 @@ function Dashboard() {
                 const annualSummaryData = await apiService.getCurrentYearCategorySummary();
                 const currentMonthlyIncome = await apiService.getCurrentMonthlyIncome();
                 const currentMonthlyOutgoings = await apiService.getCurrentMonthlyOutgoings();
-                const annualIncomeData = await apiService.getAnnualIncome();  // Fetch annual income
-                const annualOutgoingsData = await apiService.getAnnualOutgoings();  // Fetch annual outgoings
+                const annualIncomeData = await apiService.getAnnualIncome();
+                const annualOutgoingsData = await apiService.getAnnualOutgoings();
+
+                // Debugging API responses
+                console.log('Monthly Category Summary:', monthlySummaryData);
+                console.log('Annual Category Summary:', annualSummaryData);
+                console.log('Current Monthly Outgoings:', currentMonthlyOutgoings);
 
                 if (mounted) {
                     setUser(userData);
@@ -36,8 +43,11 @@ function Dashboard() {
                     setAnnualCategorySummary(annualSummaryData);
                     setCurrentMonthlyIncome(currentMonthlyIncome);
                     setCurrentMonthlyOutgoings(currentMonthlyOutgoings);
-                    setAnnualIncome(annualIncomeData);  // Set annual income state
-                    setAnnualOutgoings(annualOutgoingsData);  // Set annual outgoings state
+                    setAnnualIncome(annualIncomeData);
+                    setAnnualOutgoings(annualOutgoingsData);
+                    // Debugging state after setting
+                    console.log('State after set - Monthly Summary:', monthlySummaryData);
+                    console.log('State after set - Current Monthly Outgoings:', currentMonthlyOutgoings);
                 }
             } catch (err) {
                 console.error('Failed to fetch data:', err);
@@ -57,59 +67,84 @@ function Dashboard() {
 
     if (!user) return <div className="dashboard-loading">Loading...</div>;
 
-    const renderCategorySummary = (categorySummary) => {
-        return Object.entries(categorySummary).map(([category, summary]) => (
-            <li key={category}>
-                <span className="category-name">{category}</span>
-                <span className="category-details">
-                    {summary.transactionCount} transactions,
-                    {summary.status === "INCOME" ? (
-                        `${summary.totalAmount.toFixed(2)} USD income`
-                    ) : (
-                        `${summary.totalAmount.toFixed(2)} USD spent`
-                    )}
-                </span>
-            </li>
-        ));
+    const renderCategorySummary = (categorySummary, status) => {
+        // Flatten the nested arrays and filter by status
+        const filteredSummary = Object.entries(categorySummary)
+            .flatMap(([category, summaries]) =>
+                summaries.map(summary => ({ category, ...summary }))
+            )
+            .filter(summary => summary.status === status);
+
+        // Debugging filtered result
+        console.log(`Filtering for ${status}:`, filteredSummary);
+
+        return filteredSummary.length > 0 ? (
+            <ul>
+                {filteredSummary.map((summary, index) => (
+                    <li key={`${summary.category}-${index}`} className="category-item">
+                        <span className="category-name">{summary.category}</span>
+                        <span className="category-details">
+                            {summary.transactionCount} transaction(s) • {summary.totalAmount.toFixed(2)} USD
+                        </span>
+                    </li>
+                ))}
+            </ul>
+        ) : (
+            <p>No data available</p>
+        );
+    };
+
+    const handleIncomeClick = () => {
+        navigate('/expenses', { state: { status: 'INCOME' } });
+    };
+
+    const handleOutgoingsClick = () => {
+        navigate('/expenses', { state: { status: 'OUTGOING' } });
     };
 
     return (
         <div className="dashboard-container">
             <h1 className="dashboard-title">Welcome, {user.username}</h1>
             <div className="budget-grid">
-                <div className="budget-panel monthly">
+                <div className="budget-panel monthly" onClick={() => navigate('/expenses')} style={{ cursor: 'pointer' }}>
                     <div className="panel-header">
                         <h2>Monthly Budget</h2>
                         <span className="panel-subtitle">{monthName} {year}</span>
                     </div>
                     <div className="panel-value">
                         <span className={monthlyBudget < 0 ? 'negative' : 'positive'}>
-                            {monthlyBudget !== null ? `${monthlyBudget} USD` : 'Loading...'}
+                            {monthlyBudget !== null ? `${monthlyBudget.toFixed(2)} USD` : 'Loading...'}
                         </span>
                     </div>
                     <div className="sub-cards">
-                        <div className="income-card">
+                        <div
+                            className="income-card"
+                            onClick={handleIncomeClick}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <h3>Income</h3>
-                            <span className={currentMonthlyIncome >= 0 ? 'positive' : 'negative'}>
-                                {currentMonthlyIncome !== null ? `${currentMonthlyIncome} USD` : 'Loading...'}
+                            <span className="positive">
+                                {currentMonthlyIncome !== null ? `${currentMonthlyIncome.toFixed(2)} USD` : 'Loading...'}
                             </span>
+                            <div className="category-summary">
+                                <h3>Category Breakdown</h3>
+                                {renderCategorySummary(monthlyCategorySummary, 'INCOME')}
+                            </div>
                         </div>
-                        <div className="outgoings-card">
+                        <div
+                            className="outgoings-card"
+                            onClick={handleOutgoingsClick}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <h3>Outgoings</h3>
-                            <span className={currentMonthlyOutgoings >= 0 ? 'negative' : 'positive'}>
-                                {currentMonthlyOutgoings !== null ? `${currentMonthlyOutgoings} USD` : 'Loading...'}
+                            <span className="negative">
+                                {currentMonthlyOutgoings !== null ? `${currentMonthlyOutgoings.toFixed(2)} USD` : 'Loading...'}
                             </span>
+                            <div className="category-summary">
+                                <h3>Category Breakdown</h3>
+                                {renderCategorySummary(monthlyCategorySummary, 'OUTGOING')}
+                            </div>
                         </div>
-                    </div>
-                    <div className="category-summary">
-                        <h3>Category Breakdown</h3>
-                        {Object.keys(monthlyCategorySummary).length > 0 ? (
-                            <ul>
-                                {renderCategorySummary(monthlyCategorySummary)}
-                            </ul>
-                        ) : (
-                            <p>No data available</p>
-                        )}
                     </div>
                 </div>
                 <div className="budget-panel annual">
@@ -119,32 +154,30 @@ function Dashboard() {
                     </div>
                     <div className="panel-value">
                         <span className={annualBudget < 0 ? 'negative' : 'positive'}>
-                            {annualBudget !== null ? `${annualBudget} USD` : 'Loading...'}
+                            {annualBudget !== null ? `${annualBudget.toFixed(2)} USD` : 'Loading...'}
                         </span>
                     </div>
                     <div className="sub-cards">
                         <div className="income-card">
                             <h3>Income</h3>
-                            <span className={annualIncome >= 0 ? 'positive' : 'negative'}>
-                                {annualIncome !== null ? `${annualIncome} USD` : 'Loading...'}
+                            <span className="positive">
+                                {annualIncome !== null ? `${annualIncome.toFixed(2)} USD` : 'Loading...'}
                             </span>
+                            <div className="category-summary">
+                                <h3>Category Breakdown</h3>
+                                {renderCategorySummary(annualCategorySummary, 'INCOME')}
+                            </div>
                         </div>
                         <div className="outgoings-card">
                             <h3>Outgoings</h3>
-                            <span className={annualOutgoings >= 0 ? 'negative' : 'positive'}>
-                                {annualOutgoings !== null ? `${annualOutgoings} USD` : 'Loading...'}
+                            <span className="negative">
+                                {annualOutgoings !== null ? `${annualOutgoings.toFixed(2)} USD` : 'Loading...'}
                             </span>
+                            <div className="category-summary">
+                                <h3>Category Breakdown</h3>
+                                {renderCategorySummary(annualCategorySummary, 'OUTGOING')}
+                            </div>
                         </div>
-                    </div>
-                    <div className="category-summary">
-                        <h3>Category Breakdown</h3>
-                        {Object.keys(annualCategorySummary).length > 0 ? (
-                            <ul>
-                                {renderCategorySummary(annualCategorySummary)}
-                            </ul>
-                        ) : (
-                            <p>No data available</p>
-                        )}
                     </div>
                 </div>
             </div>

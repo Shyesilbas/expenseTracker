@@ -1,17 +1,19 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { deleteExpense, updateExpense } from '../../services/ExpenseService';
 import apiService from '../../services/api';
 import PieChart from '../../components/PieChart';
 import '../../styles/ExpenseList.css';
 import _ from 'lodash';
 import { DateUtils } from '../../utils/DateUtils';
-import Filters from '../expenseList/Filters';
-import BudgetSummary from '../expenseList/BudgetSummary';
-import ExpenseTable from '../expenseList/ExpenseTable';
-import {showConfirmation, showError, showSuccess} from "../../utils/SweetAlertUtils";
+import Filters from '../../pages/expenseList/Filters';
+import BudgetSummary from '../../pages/expenseList/BudgetSummary';
+import ExpenseTable from '../../pages/expenseList/ExpenseTable';
+import { showConfirmation, showError, showSuccess } from "../../utils/SweetAlertUtils";
 
 function ExpenseList() {
     const currentDate = new Date();
+    const location = useLocation();
     const [expenses, setExpenses] = useState([]);
     const [financialData, setFinancialData] = useState({
         monthlyBudget: null,
@@ -22,7 +24,7 @@ function ExpenseList() {
         year: currentDate.getFullYear(),
         month: currentDate.getMonth() + 1,
         category: '',
-        status: '',
+        status: location.state?.status || '',
         currency: '',
         date: '',
     });
@@ -128,13 +130,13 @@ function ExpenseList() {
             ...(name === 'year' || name === 'month'
                 ? {
                     category: '',
-                    status: '',
+                    status: location.state?.status || '', // Preserve status from navigation
                     currency: '',
                     date: '',
                 }
                 : {}),
         }));
-    }, []);
+    }, [location.state?.status]);
 
     return (
         <div className="expense-list-container">

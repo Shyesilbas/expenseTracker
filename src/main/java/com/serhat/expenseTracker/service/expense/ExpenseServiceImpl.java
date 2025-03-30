@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,7 @@ public class ExpenseServiceImpl implements ExpenseService {
         expenseRepository.delete(expense);
         return "Expense deleted successfully.";
     }
+    
 
     @Override
     public ExpenseDto updateExpense(UpdateExpenseRequest request) {
@@ -103,8 +105,9 @@ public class ExpenseServiceImpl implements ExpenseService {
 
         return expenseMapper.toExpenseDto(expense);
     }
+
     @Override
-    public Map<Category, CategorySummary> getCurrentMonthCategorySummary() {
+    public Map<Category, List<CategorySummary>> getCurrentMonthCategorySummary() {
         AppUser user = currentUser();
         LocalDate now = LocalDate.now();
         LocalDate startDate = YearMonth.from(now).atDay(1);
@@ -114,40 +117,49 @@ public class ExpenseServiceImpl implements ExpenseService {
 
         return expenses.stream()
                 .collect(Collectors.groupingBy(
-                        Expense::getCategory,
+                        Expense::getCategory, // Group by Category enum
                         Collectors.collectingAndThen(
-                                Collectors.toList(),
-                                list -> new CategorySummary(
-                                        list.size(),
-                                        list.stream()
-                                                .filter(expense -> expense.getStatus() == Status.OUTGOING)
-                                                .mapToDouble(expense -> expense.getAmount().doubleValue())
-                                                .sum()
-                                )
+                                Collectors.groupingBy(
+                                        Expense::getStatus,
+                                        Collectors.collectingAndThen(
+                                                Collectors.toList(),
+                                                list -> new CategorySummary(
+                                                        list.size(),
+                                                        list.stream().mapToDouble(expense -> expense.getAmount().doubleValue()).sum(),
+                                                        list.get(0).getStatus()
+                                                )
+                                        )
+                                ),
+                                statusMap -> new ArrayList<>(statusMap.values())
                         )
                 ));
     }
 
     @Override
-    public Map<Category, CategorySummary> getCurrentYearCategorySummary() {
+    public Map<Category, List<CategorySummary>> getCurrentYearCategorySummary() {
         AppUser user = currentUser();
         LocalDate now = LocalDate.now();
         LocalDate startDate = LocalDate.of(now.getYear(), 1, 1);
+        LocalDate endDate = now;
 
-        List<Expense> expenses = expenseRepository.findByUserAndDateBetween(user, startDate, now);
+        List<Expense> expenses = expenseRepository.findByUserAndDateBetween(user, startDate, endDate);
 
         return expenses.stream()
                 .collect(Collectors.groupingBy(
-                        Expense::getCategory,
+                        Expense::getCategory, // Group by Category enum
                         Collectors.collectingAndThen(
-                                Collectors.toList(),
-                                list -> new CategorySummary(
-                                        list.size(),
-                                        list.stream()
-                                                .filter(expense -> expense.getStatus() == Status.OUTGOING)
-                                                .mapToDouble(expense -> expense.getAmount().doubleValue())
-                                                .sum()
-                                )
+                                Collectors.groupingBy(
+                                        Expense::getStatus,
+                                        Collectors.collectingAndThen(
+                                                Collectors.toList(),
+                                                list -> new CategorySummary(
+                                                        list.size(),
+                                                        list.stream().mapToDouble(expense -> expense.getAmount().doubleValue()).sum(),
+                                                        list.get(0).getStatus()
+                                                )
+                                        )
+                                ),
+                                statusMap -> new ArrayList<>(statusMap.values())
                         )
                 ));
     }
