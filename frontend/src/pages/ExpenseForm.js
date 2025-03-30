@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiService from '../services/api';
 import '../styles/ExpenseForm.css';
+import { DateUtils } from '../utils/DateUtils';
+import { CATEGORIES, CURRENCIES } from '../constants/constants';
+import {showConfirmation, showError, showSuccess} from "../utils/SweetAlertUtils";
 
 function ExpenseForm() {
     const today = new Date();
@@ -13,7 +16,7 @@ function ExpenseForm() {
         category: '',
         status: 'OUTGOING',
         description: '',
-        currency: 'TL'
+        currency: 'TL',
     });
 
     const navigate = useNavigate();
@@ -28,19 +31,28 @@ function ExpenseForm() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        const confirmed = await showConfirmation({
+            title: 'Add Transaction',
+            text: 'Are you sure you want to add this transaction?',
+            confirmButtonText: 'Yes, add it!',
+        });
+
+        if (!confirmed) return;
+
         try {
-            const formattedDate = expense.date.split('-').reverse().join('-'); // yyyy-MM-dd -> dd-MM-yyyy
+            const formattedDate = DateUtils.formatDate(expense.date);
             const expenseToSend = {
                 ...expense,
                 date: formattedDate,
             };
-            console.log('Sending expense:', expenseToSend);
             await apiService.createExpense(expenseToSend);
-            alert('Transaction added successfully!');
+            showSuccess({ text: 'Transaction added successfully!' });
             navigate('/expenses');
         } catch (err) {
-            console.error('Error adding expense:', err.response || err);
-            alert(`Error: ${err.response?.status || 'Unknown'} - ${err.response?.data?.message || err.message}`);
+            showError({
+                text: `Error: ${err.response?.status || 'Unknown'} - ${err.response?.data?.message || err.message}`,
+            });
         }
     };
 
@@ -69,12 +81,11 @@ function ExpenseForm() {
                             onChange={handleChange}
                             required
                         >
-                            <option value="TL">TL</option>
-                            <option value="USD">USD</option>
-                            <option value="EUR">EUR</option>
-                            <option value="GBP">GBP</option>
-                            <option value="GOLD">Gold</option>
-                            <option value="SILVER">Silver</option>
+                            {CURRENCIES.map((currency) => (
+                                <option key={currency} value={currency}>
+                                    {currency}
+                                </option>
+                            ))}
                         </select>
                     </div>
                 </div>
@@ -98,18 +109,11 @@ function ExpenseForm() {
                             required
                         >
                             <option value="">Choose a category</option>
-                            <option value="SHOPPING">Shopping</option>
-                            <option value="RENT">Rent</option>
-                            <option value="INVESTMENT">Investment</option>
-                            <option value="EDUCATION">Education</option>
-                            <option value="DEBT_PAYMENT">Debt Payment</option>
-                            <option value="SALARY">Salary</option>
-                            <option value="TRAVEL">Travel</option>
-                            <option value="OTHER">Other</option>
-                            <option value="BET">Bet</option>
-                            <option value="TELECOMMUNICATION">Telecommunication</option>
-                            <option value="TRANSPORTATION">Transportation</option>
-                            <option value="TAX">Tax</option>
+                            {CATEGORIES.map((category) => (
+                                <option key={category} value={category}>
+                                    {category}
+                                </option>
+                            ))}
                         </select>
                     </div>
                 </div>
@@ -119,14 +123,14 @@ function ExpenseForm() {
                         <button
                             type="button"
                             className={`toggle-btn ${expense.status === 'INCOME' ? 'active' : ''}`}
-                            onClick={() => setExpense(prev => ({ ...prev, status: 'INCOME' }))}
+                            onClick={() => setExpense((prev) => ({ ...prev, status: 'INCOME' }))}
                         >
                             Income
                         </button>
                         <button
                             type="button"
                             className={`toggle-btn ${expense.status === 'OUTGOING' ? 'active' : ''}`}
-                            onClick={() => setExpense(prev => ({ ...prev, status: 'OUTGOING' }))}
+                            onClick={() => setExpense((prev) => ({ ...prev, status: 'OUTGOING' }))}
                         >
                             Outgoing
                         </button>
@@ -138,7 +142,7 @@ function ExpenseForm() {
                         name="description"
                         value={expense.description}
                         onChange={handleChange}
-                        placeholder="What was this expense for?"
+                        placeholder="Add your notes here"
                         rows="2"
                     />
                 </div>

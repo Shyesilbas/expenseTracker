@@ -61,6 +61,9 @@ public class ExpenseServiceImpl implements ExpenseService {
         if (request.currency() != null) {
             expense.setCurrency(request.currency());
         }
+        if (request.description() != null) {
+            expense.setDescription(request.description());
+        }
         if (request.status() != null) {
             expense.setStatus(request.status());
         }

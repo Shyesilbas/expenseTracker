@@ -27,7 +27,6 @@ function CurrencyConversion() {
         }
     };
 
-    // Format the date for last updated
     const formatDate = (date) => {
         return new Intl.DateTimeFormat('en-GB', {
             day: '2-digit',

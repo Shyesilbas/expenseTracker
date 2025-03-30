@@ -12,6 +12,7 @@ public record UpdateExpenseRequest(
         Long id,
         BigDecimal amount,
         Currency currency,
+        String description,
         Status status,
         Category category,
         @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")

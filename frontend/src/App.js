@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Register from './pages/Register';
-import ExpenseList from './pages/ExpenseList';
+import ExpenseList from './pages/expenseList/ExpenseList';
 import SavingsPage from './pages/SavingsPage';
 import CurrencyConversion from './pages/CurrencyConversion';
 import ExpenseForm from './pages/ExpenseForm';
