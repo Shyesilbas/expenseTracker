@@ -10,20 +10,17 @@ import java.math.BigDecimal;
 
 public interface UserService {
     AppUser getCurrentUser();
-    BigDecimal getMonthlyBudgetStatus();
-    BigDecimal annualBudget();
     UserDto userInfo();
     void saveUser(AppUser user);
     AppUser createUser(RegisterRequest request);
     void validateRegistration(RegisterRequest request);
     UserDetails loadUserByUsername(String username);
 
-    BigDecimal monthlyIncome();
-    BigDecimal monthlyOutgoings();
-    BigDecimal annualOutgoings();
-    BigDecimal annualIncome();
     Currency setfavoriteCurrency(Currency currency);
     BigDecimal getBudgetStatusByYearAndMonth(int year, int month);
     BigDecimal getIncomeByYearAndMonth(int year, int month);
     BigDecimal getOutgoingsByYearAndMonth(int year, int month);
+    BigDecimal getAnnualBudget(int year);
+    BigDecimal getAnnualIncome(int year);
+    BigDecimal getAnnualOutgoings(int year);
 }

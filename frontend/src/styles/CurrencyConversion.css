@@ -1,11 +1,11 @@
-.currency-converter {
+.cc-currency-converter {
     max-width: 540px;
     margin: 2rem auto;
     font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
     color: #2d3748;
 }
 
-.currency-converter h2 {
+.cc-currency-converter h2 {
     text-align: center;
     margin-bottom: 1.5rem;
     font-weight: 700;
@@ -14,7 +14,7 @@
     letter-spacing: -0.5px;
 }
 
-.converter-card {
+.cc-converter-card {
     background: #ffffff;
     border-radius: 16px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
@@ -26,7 +26,7 @@
     overflow: hidden;
 }
 
-.converter-card::before {
+.cc-converter-card::before {
     content: '';
     position: absolute;
     top: 0;
@@ -36,69 +36,72 @@
     background: linear-gradient(90deg, #4da1f7, #7bbbf6);
 }
 
-
-.input-group {
+.cc-input-group {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
-.input-group label {
+.cc-input-group label {
     font-size: 0.9rem;
     font-weight: 600;
     color: #4a5568;
 }
 
-.amount-wrapper {
+.cc-amount-wrapper {
     position: relative;
     display: flex;
     align-items: center;
 }
 
-.currency-symbol {
+.cc-currency-symbol {
     position: absolute;
     left: 1rem;
     color: #718096;
     font-weight: 500;
+    z-index: 1; /* Ensure symbol stays above input */
 }
 
-.amount-input {
+.cc-amount-input {
     width: 100%;
-    padding: 1rem 1rem 1rem 2rem;
+    padding: 1rem 1rem 1rem 2.5rem; /* Adjusted padding for symbol */
     border: 2px solid #e2e8f0;
     border-radius: 10px;
     font-size: 1.2rem;
     font-weight: 500;
     transition: all 0.2s ease;
     background-color: #f7fafc;
+    box-sizing: border-box; /* Prevent padding from causing overflow */
 }
 
-.amount-input:focus {
+.cc-amount-input:focus {
     outline: none;
     border-color: #4da1f7;
     box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
 }
 
-.currency-selectors {
+.cc-currency-selectors {
     display: flex;
-    align-items: center;
+    align-items: flex-end; /* Align bottoms of selectors and button */
     gap: 1rem;
 }
 
-.selector-group {
+.cc-selector-group {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
 }
 
-.selector-group label {
+.cc-selector-group label {
     font-size: 0.9rem;
     font-weight: 600;
     color: #4a5568;
 }
 
-.currency-select {
+.cc-currency-select {
+    width: 100%;
+    padding: 0.9rem 2.5rem 0.9rem 1rem;
     border: 2px solid #e2e8f0;
     border-radius: 10px;
     font-size: 1rem;
@@ -108,18 +111,17 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%232d3748' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: calc(100% - 1rem) center;
-    padding: 0.9rem 2.5rem 0.9rem 1rem;
     transition: all 0.2s ease;
+    box-sizing: border-box;
 }
 
-.currency-select:focus {
+.cc-currency-select:focus {
     outline: none;
     border-color: #4da1f7;
     box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
 }
 
-
-.swap-btn {
+.cc-swap-btn {
     width: 48px;
     height: 48px;
     border-radius: 50%;
@@ -131,21 +133,19 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
-    margin-top: 1.5rem;
     flex-shrink: 0;
 }
 
-.swap-btn:hover {
+.cc-swap-btn:hover {
     background-color: #bee3f8;
     transform: scale(1.05);
 }
 
-.swap-btn:active {
+.cc-swap-btn:active {
     transform: scale(0.95);
 }
 
-
-.convert-btn {
+.cc-convert-btn {
     margin-top: 0.5rem;
     padding: 1rem;
     background: linear-gradient(90deg, #4da1f7, #7bbbf6);
@@ -160,7 +160,7 @@
     overflow: hidden;
 }
 
-.convert-btn::before {
+.cc-convert-btn::before {
     content: '';
     position: absolute;
     top: 0;
@@ -171,36 +171,36 @@
     transition: all 0.6s ease;
 }
 
-.convert-btn:hover::before {
+.cc-convert-btn:hover::before {
     left: 100%;
 }
 
-.convert-btn:hover {
+.cc-convert-btn:hover {
     background: linear-gradient(90deg, #2b6cb0, #4da1f7);
     box-shadow: 0 4px 12px rgba(66, 153, 225, 0.25);
     transform: translateY(-2px);
 }
 
-.convert-btn:active {
+.cc-convert-btn:active {
     transform: translateY(0);
     box-shadow: 0 2px 6px rgba(66, 153, 225, 0.2);
 }
 
-.convert-btn.loading {
+.cc-convert-btn.cc-loading {
     opacity: 0.8;
     cursor: not-allowed;
 }
 
-.result {
+.cc-result {
     margin-top: 0.5rem;
     padding: 1.5rem;
     background-color: #f7fafc;
     border-radius: 10px;
     border-left: 4px solid #4da1f7;
-    animation: fadeIn 0.4s ease;
+    animation: cc-fadeIn 0.4s ease;
 }
 
-.result-amount {
+.cc-result-amount {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -208,23 +208,23 @@
     margin-bottom: 0.8rem;
 }
 
-.initial-amount {
+.cc-initial-amount {
     font-size: 1.1rem;
     color: #4a5568;
 }
 
-.equals {
+.cc-equals {
     color: #718096;
     font-weight: bold;
 }
 
-.converted-amount {
+.cc-converted-amount {
     font-size: 1.4rem;
     font-weight: 700;
     color: #4da1f7;
 }
 
-.exchange-rate {
+.cc-exchange-rate {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -234,11 +234,11 @@
     gap: 0.5rem;
 }
 
-.last-updated {
+.cc-last-updated {
     font-style: italic;
 }
 
-@keyframes fadeIn {
+@keyframes cc-fadeIn {
     from {
         opacity: 0;
         transform: translateY(10px);
@@ -251,35 +251,35 @@
 
 /* Responsive design */
 @media (max-width: 640px) {
-    .converter-card {
+    .cc-converter-card {
         padding: 1.5rem;
     }
 
-    .currency-selectors {
+    .cc-currency-selectors {
         flex-direction: column;
         gap: 1.5rem;
     }
 
-    .swap-btn {
+    .cc-swap-btn {
         margin: 0 auto;
         transform: rotate(90deg);
     }
 
-    .swap-btn:hover {
+    .cc-swap-btn:hover {
         transform: rotate(90deg) scale(1.05);
     }
 
-    .swap-btn:active {
+    .cc-swap-btn:active {
         transform: rotate(90deg) scale(0.95);
     }
 
-    .result-amount {
+    .cc-result-amount {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.3rem;
     }
 
-    .exchange-rate {
+    .cc-exchange-rate {
         flex-direction: column;
         align-items: flex-start;
     }

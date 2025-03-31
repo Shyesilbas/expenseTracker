@@ -16,7 +16,7 @@ function ExpenseForm() {
         date: formattedDate,
         category: '',
         status: 'OUTGOING',
-        description: '',
+        description: '', // Added description field
         currency: 'TL', // Default currency
     });
 
@@ -129,6 +129,16 @@ function ExpenseForm() {
                             ))}
                         </select>
                     </div>
+                </div>
+                <div className="form-group full-width">
+                    <label>Description</label>
+                    <textarea
+                        name="description"
+                        value={expense.description}
+                        onChange={handleChange}
+                        placeholder="Enter a description"
+                        rows="3"
+                    />
                 </div>
                 <div className="form-group full-width">
                     <label>Status</label>

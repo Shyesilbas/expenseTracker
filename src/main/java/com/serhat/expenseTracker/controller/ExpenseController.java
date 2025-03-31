@@ -1,12 +1,12 @@
 package com.serhat.expenseTracker.controller;
 
 import com.serhat.expenseTracker.dto.objects.ExpenseDto;
+import com.serhat.expenseTracker.dto.objects.SummaryDto;
 import com.serhat.expenseTracker.dto.requests.ExpenseRequest;
 import com.serhat.expenseTracker.dto.requests.UpdateExpenseRequest;
 import com.serhat.expenseTracker.entity.enums.Category;
 import com.serhat.expenseTracker.entity.enums.Currency;
 import com.serhat.expenseTracker.entity.enums.Status;
-import com.serhat.expenseTracker.service.expense.CategorySummary;
 import com.serhat.expenseTracker.service.expense.ExpenseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/expenses")
@@ -51,16 +50,15 @@ public class ExpenseController {
         return ResponseEntity.ok(expenseService.updateExpense(request));
     }
 
-    @GetMapping("/current-month-category-summary")
-    public ResponseEntity<Map<Category, List<CategorySummary>>> getCurrentMonthCategorySummary() {
-        Map<Category, List<CategorySummary>> summary = expenseService.getCurrentMonthCategorySummary();
-        return ResponseEntity.ok(summary);
+    @GetMapping("/monthly-summary/{year}/{month}")
+    public ResponseEntity<SummaryDto> summaryByYearAndMonth(@PathVariable int year,@PathVariable int month) {
+        return ResponseEntity.ok(expenseService.getSummaryByYearAndMonth(year, month));
     }
 
-    @GetMapping("/current-year-category-summary")
-    public ResponseEntity<Map<Category, List<CategorySummary>>> getCurrentYearCategorySummary() {
-        Map<Category, List<CategorySummary>> summary = expenseService.getCurrentYearCategorySummary();
-        return ResponseEntity.ok(summary);
+    @GetMapping("/annual-summary/{year}")
+    public ResponseEntity<SummaryDto> getAnnualSummary(@PathVariable int year) {
+        return ResponseEntity.ok(expenseService.getSummaryByYear(year));
+
     }
 
     @GetMapping("/filter")

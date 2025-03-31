@@ -45,23 +45,21 @@ function ExpenseList() {
         setError(null);
         try {
             const { year, month } = filters;
-            const [budget, income, spent, expenseData] = await Promise.all([
-                apiService.getMonthlyBudget(year, month),
-                apiService.getMonthlyIncome(year, month),
-                apiService.getMonthlyOutgoings(year, month),
-                apiService.getExpensesByFilters(
-                    Object.fromEntries(
-                        Object.entries(filters).map(([key, value]) => [key, value || undefined])
-                    )
-                ),
-            ]);
+
+            // Fetch monthly summary instead of separate calls
+            const monthlySummary = await apiService.getMonthlySummary(year, month);
+            const expenseData = await apiService.getExpensesByFilters(
+                Object.fromEntries(
+                    Object.entries(filters).map(([key, value]) => [key, value || undefined])
+                )
+            );
 
             setFinancialData({
-                monthlyBudget: budget,
-                totalIncome: income,
-                totalSpent: spent,
+                monthlyBudget: monthlySummary?.totalBudget ?? 0.00,
+                totalIncome: monthlySummary?.totalIncome ?? 0.00,
+                totalSpent: monthlySummary?.totalOutgoings ?? 0.00,
             });
-            setExpenses(expenseData);
+            setExpenses(expenseData || []);
         } catch (err) {
             console.error('Failed to fetch data:', err);
             setError('Failed to load data. Please try again.');

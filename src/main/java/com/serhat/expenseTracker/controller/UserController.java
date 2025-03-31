@@ -1,4 +1,5 @@
 package com.serhat.expenseTracker.controller;
+
 import com.serhat.expenseTracker.dto.objects.UserDto;
 import com.serhat.expenseTracker.service.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -14,43 +15,8 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<UserDto> me(){
+    public ResponseEntity<UserDto> me() {
         return ResponseEntity.ok(userService.userInfo());
-    }
-
-    @GetMapping("/monthly-income")
-    public ResponseEntity<BigDecimal> getMonthlyIncome() {
-        BigDecimal monthlyIncome = userService.monthlyIncome();
-        return ResponseEntity.ok(monthlyIncome);
-    }
-
-    @GetMapping("/monthly-outgoings")
-    public ResponseEntity<BigDecimal> getMonthlyOutgoings() {
-        BigDecimal monthlyOutgoings = userService.monthlyOutgoings();
-        return ResponseEntity.ok(monthlyOutgoings);
-    }
-    @GetMapping("/monthly-budget")
-    public ResponseEntity<BigDecimal> getMonthlyBudgetStatus() {
-        BigDecimal budgetStatus = userService.getMonthlyBudgetStatus();
-        return ResponseEntity.ok(budgetStatus);
-    }
-
-    @GetMapping("/annual-income")
-    public ResponseEntity<BigDecimal> getAnnualIncome() {
-        BigDecimal monthlyIncome = userService.annualIncome();
-        return ResponseEntity.ok(monthlyIncome);
-    }
-
-    @GetMapping("/annual-outgoings")
-    public ResponseEntity<BigDecimal> getAnnualOutgoings() {
-        BigDecimal monthlyOutgoings = userService.annualOutgoings();
-        return ResponseEntity.ok(monthlyOutgoings);
-    }
-
-    @GetMapping("/annual-budget")
-    public ResponseEntity<BigDecimal> getAnnualBudget() {
-        BigDecimal annualOutgoings = userService.annualBudget();
-        return ResponseEntity.ok(annualOutgoings);
     }
 
     @GetMapping("/budget/{year}/{month}")
@@ -75,5 +41,26 @@ public class UserController {
             @PathVariable int month) {
         BigDecimal outgoings = userService.getOutgoingsByYearAndMonth(year, month);
         return ResponseEntity.ok(outgoings);
+    }
+
+    @GetMapping("/annual-budget/{year}")
+    public ResponseEntity<BigDecimal> getAnnualBudget(
+            @PathVariable int year) {
+        BigDecimal annualBudget = userService.getAnnualBudget(year);
+        return ResponseEntity.ok(annualBudget);
+    }
+
+    @GetMapping("/annual-income/{year}")
+    public ResponseEntity<BigDecimal> getAnnualIncome(
+            @PathVariable int year) {
+        BigDecimal annualIncome = userService.getAnnualIncome(year);
+        return ResponseEntity.ok(annualIncome);
+    }
+
+    @GetMapping("/annual-outgoings/{year}")
+    public ResponseEntity<BigDecimal> getAnnualOutgoings(
+            @PathVariable int year) {
+        BigDecimal annualOutgoings = userService.getAnnualOutgoings(year);
+        return ResponseEntity.ok(annualOutgoings);
     }
 }

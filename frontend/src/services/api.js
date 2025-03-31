@@ -47,113 +47,30 @@ class ApiService {
         }
     }
 
-    async getCurrentMonthlyBudget() {
+    async getExpenseById(expenseId) {
         try {
-            const response = await this.api.get('/api/user/monthly-budget');
+            const response = await this.api.get(`/api/expenses/${expenseId}`);
             return response.data;
         } catch (error) {
-            console.error('Current monthly budget fetch error:', error);
-            return 0.00;
+            throw error.response?.data || error.message;
         }
     }
 
-    async getCurrentMonthCategorySummary() {
+    async getMonthlySummary(year, month) {
         try {
-            const response = await this.api.get('/api/expenses/current-month-category-summary');
+            const response = await this.api.get(`/api/expenses/monthly-summary/${year}/${month}`);
             return response.data;
         } catch (error) {
-            console.error('Current month category summary fetch error:', error);
-            return {};
+            throw error.response?.data || error.message;
         }
     }
 
-    async getCurrentYearCategorySummary() {
+    async getAnnualSummary(year) {
         try {
-            const response = await this.api.get('/api/expenses/current-year-category-summary');
+            const response = await this.api.get(`/api/expenses/annual-summary/${year}`);
             return response.data;
         } catch (error) {
-            console.error('Current year category summary fetch error:', error);
-            return {};
-        }
-    }
-
-    async getAnnualBudget() {
-        try {
-            const response = await this.api.get('/api/user/annual-budget');
-            return response.data;
-        } catch (error) {
-            console.error('Current monthly budget fetch error:', error);
-            return 0.00;
-        }
-    }
-
-    async getAnnualIncome() {
-        try {
-            const response = await this.api.get('/api/user/annual-income');
-            return response.data;
-        } catch (error) {
-            console.error('Annual income fetch error:', error);
-            return 0.00;
-        }
-    }
-
-    async getAnnualOutgoings() {
-        try {
-            const response = await this.api.get('/api/user/annual-outgoings');
-            return response.data;
-        } catch (error) {
-            console.error('Annual outgoings fetch error:', error);
-            return 0.00;
-        }
-    }
-
-    async getMonthlyBudget(year, month) {
-        try {
-            const response = await this.api.get(`/api/user/budget/${year}/${month}`);
-            return response.data;
-        } catch (error) {
-            console.error('Monthly budget fetch error:', error);
-            return 0.00;
-        }
-    }
-
-    async getCurrentMonthlyIncome() {
-        try {
-            const response = await this.api.get('/api/user/monthly-income');
-            return response.data;
-        } catch (error) {
-            console.error('Current monthly income fetch error:', error);
-            return 0.00;
-        }
-    }
-
-    async getCurrentMonthlyOutgoings() {
-        try {
-            const response = await this.api.get('/api/user/monthly-outgoings');
-            return response.data;
-        } catch (error) {
-            console.error('Current monthly outgoings fetch error:', error);
-            return 0.00;
-        }
-    }
-
-    async getMonthlyIncome(year, month) {
-        try {
-            const response = await this.api.get(`/api/user/income/${year}/${month}`);
-            return response.data;
-        } catch (error) {
-            console.error('Monthly income fetch error:', error);
-            return 0.00;
-        }
-    }
-
-    async getMonthlyOutgoings(year, month) {
-        try {
-            const response = await this.api.get(`/api/user/outgoings/${year}/${month}`);
-            return response.data;
-        } catch (error) {
-            console.error('Monthly outgoings fetch error:', error);
-            return 0.00;
+            throw error.response?.data || error.message;
         }
     }
 
@@ -248,6 +165,7 @@ class ApiService {
             throw error.response?.data || error.message;
         }
     }
+
     async setFavCurrency(currency) {
         try {
             const response = await this.api.post('/api/settings/setFavCurrency', { currency });
@@ -256,7 +174,6 @@ class ApiService {
             throw error.response?.data || error.message;
         }
     }
-
 }
 
 export default new ApiService();

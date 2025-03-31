@@ -47,48 +47,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public BigDecimal getMonthlyBudgetStatus() {
-        return monthlyIncome().subtract(monthlyOutgoings());
-    }
-
-    @Override
-    public BigDecimal monthlyIncome() { // current date
-        LocalDate now = LocalDate.now();
-        LocalDate startOfMonth = now.withDayOfMonth(1);
-        LocalDate endOfMonth = now.withDayOfMonth(now.lengthOfMonth());
-        return getIncomeBetweenDates(startOfMonth, endOfMonth);
-    }
-
-    @Override
-    public BigDecimal monthlyOutgoings() { // current date
-        LocalDate now = LocalDate.now();
-        LocalDate startOfMonth = now.withDayOfMonth(1);
-        LocalDate endOfMonth = now.withDayOfMonth(now.lengthOfMonth());
-        return getOutgoingsBetweenDates(startOfMonth, endOfMonth);
-    }
-
-    @Override
-    public BigDecimal annualIncome() {
-        LocalDate now = LocalDate.now();
-        LocalDate startOfYear = now.withDayOfYear(1);
-        LocalDate endOfYear = now.withMonth(12).withDayOfMonth(31);
-        return getIncomeBetweenDates(startOfYear, endOfYear);
-    }
-
-    @Override
-    public BigDecimal annualOutgoings() {
-        LocalDate now = LocalDate.now();
-        LocalDate startOfYear = now.withDayOfYear(1);
-        LocalDate endOfYear = now.withMonth(12).withDayOfMonth(31);
-        return getOutgoingsBetweenDates(startOfYear, endOfYear);
-    }
-
-    public BigDecimal annualBudget(){
-        return annualIncome().subtract(annualOutgoings());
-    }
-
-    @Override
-    public BigDecimal getBudgetStatusByYearAndMonth(int year, int month) { // for specific month and year
+    public BigDecimal getBudgetStatusByYearAndMonth(int year, int month) {
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
         BigDecimal income = getIncomeBetweenDates(startDate, endDate);
@@ -108,6 +67,28 @@ public class UserServiceImpl implements UserService {
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
         return getOutgoingsBetweenDates(startDate, endDate);
+    }
+
+    public BigDecimal getAnnualIncome(int year) {
+        LocalDate startDate = LocalDate.of(year, 1, 1);
+        LocalDate endDate = LocalDate.of(year, 12, 31);
+        return getIncomeBetweenDates(startDate, endDate);
+    }
+
+    public BigDecimal getAnnualOutgoings(int year) {
+        LocalDate startDate = LocalDate.of(year, 1, 1);
+        LocalDate endDate = LocalDate.of(year, 12, 31);
+        return getOutgoingsBetweenDates(startDate, endDate);
+    }
+
+    public BigDecimal getAnnualBudget(int year) {
+        BigDecimal totalIncome = BigDecimal.ZERO;
+        BigDecimal totalOutgoings = BigDecimal.ZERO;
+        for (int month = 1; month <= 12; month++) {
+            totalIncome = totalIncome.add(getIncomeByYearAndMonth(year, month));
+            totalOutgoings = totalOutgoings.add(getOutgoingsByYearAndMonth(year, month));
+        }
+        return totalIncome.subtract(totalOutgoings);
     }
 
     private BigDecimal getIncomeBetweenDates(LocalDate startDate, LocalDate endDate) {

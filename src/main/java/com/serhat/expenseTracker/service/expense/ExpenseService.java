@@ -1,6 +1,7 @@
 package com.serhat.expenseTracker.service.expense;
 
 import com.serhat.expenseTracker.dto.objects.ExpenseDto;
+import com.serhat.expenseTracker.dto.objects.SummaryDto;
 import com.serhat.expenseTracker.dto.requests.ExpenseRequest;
 import com.serhat.expenseTracker.dto.requests.UpdateExpenseRequest;
 import com.serhat.expenseTracker.entity.enums.Category;
@@ -12,9 +13,12 @@ import java.util.List;
 import java.util.Map;
 
 public interface ExpenseService {
+    String deleteExpense(Long expenseId);
+    ExpenseDto updateExpense(UpdateExpenseRequest request);
     ExpenseDto createExpense(ExpenseRequest expenseRequest);
     ExpenseDto findExpenseById(Long expenseId);
-    ExpenseDto updateExpense(UpdateExpenseRequest request);
+    SummaryDto getSummaryByYearAndMonth(int year, int month);
+    SummaryDto getSummaryByYear(int year);
     List<ExpenseDto> findExpensesByFilters(
             Integer year,
             Integer month,
@@ -23,8 +27,4 @@ public interface ExpenseService {
             Currency currency,
             LocalDate date
     );
-    String deleteExpense(Long expenseId);
-
-    Map<Category, List<CategorySummary>> getCurrentMonthCategorySummary();
-    Map<Category, List<CategorySummary>> getCurrentYearCategorySummary();
 }

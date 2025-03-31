@@ -1,6 +1,8 @@
 package com.serhat.expenseTracker.service.expense;
 
+import com.serhat.expenseTracker.dto.objects.CategoryExpensesDto;
 import com.serhat.expenseTracker.dto.objects.ExpenseDto;
+import com.serhat.expenseTracker.dto.objects.SummaryDto;
 import com.serhat.expenseTracker.dto.requests.ExpenseRequest;
 import com.serhat.expenseTracker.dto.requests.UpdateExpenseRequest;
 import com.serhat.expenseTracker.entity.AppUser;
@@ -16,12 +18,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,9 +35,23 @@ public class ExpenseServiceImpl implements ExpenseService {
         return userService.getCurrentUser();
     }
 
+    private List<Expense> findExpensesByDateRange(AppUser user, LocalDate startDate, LocalDate endDate) {
+        return expenseRepository.findByUserAndDateBetween(user, startDate, endDate);
+    }
+
+    private List<Expense> filterExpenses(List<Expense> expenses, Category category, Status status, Currency currency, LocalDate date) {
+        return expenses.stream()
+                .filter(expense -> category == null || expense.getCategory() == category)
+                .filter(expense -> status == null || expense.getStatus() == status)
+                .filter(expense -> currency == null || expense.getCurrency() == currency)
+                .filter(expense -> date == null || expense.getDate().equals(date))
+                .toList();
+    }
+
+
     @Override
     public String deleteExpense(Long expenseId) {
-        AppUser user = userService.getCurrentUser();
+        AppUser user = currentUser();
         Expense expense = expenseRepository.findByUserAndExpenseId(user, expenseId)
                 .orElseThrow(() -> new ExpenseNotFoundException("Expense not found by id: " + expenseId));
 
@@ -46,14 +59,13 @@ public class ExpenseServiceImpl implements ExpenseService {
         return "Expense deleted successfully.";
     }
 
-
     @Override
     public ExpenseDto updateExpense(UpdateExpenseRequest request) {
         if (request.id() == null) {
             throw new IllegalArgumentException("Expense ID cannot be null");
         }
 
-        AppUser user = userService.getCurrentUser();
+        AppUser user = currentUser();
         Expense expense = expenseRepository.findByUserAndExpenseId(user, request.id())
                 .orElseThrow(() -> new ExpenseNotFoundException("Expense not found by id: " + request.id()));
 
@@ -99,7 +111,6 @@ public class ExpenseServiceImpl implements ExpenseService {
         return expenseMapper.toExpenseDto(expense);
     }
 
-
     @Override
     public ExpenseDto findExpenseById(Long expenseId) {
         AppUser user = currentUser();
@@ -110,62 +121,68 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
-    public Map<Category, List<CategorySummary>> getCurrentMonthCategorySummary() {
+    public SummaryDto getSummaryByYearAndMonth(int year, int month) {
         AppUser user = currentUser();
-        LocalDate now = LocalDate.now();
-        LocalDate startDate = YearMonth.from(now).atDay(1);
-        LocalDate endDate = YearMonth.from(now).atEndOfMonth();
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
 
-        List<Expense> expenses = expenseRepository.findByUserAndDateBetween(user, startDate, endDate);
+        List<Expense> expenses = findExpensesByDateRange(user, startDate, endDate);
+        BigDecimal totalIncome = userService.getIncomeByYearAndMonth(year, month);
+        BigDecimal totalOutgoings = userService.getOutgoingsByYearAndMonth(year, month);
+        BigDecimal totalBudget = userService.getBudgetStatusByYearAndMonth(year, month);
 
-        return expenses.stream()
+        Map<Category, List<CategoryExpensesDto>> groupedExpenses = expenses.stream()
                 .collect(Collectors.groupingBy(
-                        Expense::getCategory, // Group by Category enum
+                        Expense::getCategory,
                         Collectors.collectingAndThen(
-                                Collectors.groupingBy(
-                                        Expense::getStatus,
-                                        Collectors.collectingAndThen(
-                                                Collectors.toList(),
-                                                list -> new CategorySummary(
-                                                        list.size(),
-                                                        list.stream().mapToDouble(expense -> expense.getAmount().doubleValue()).sum(),
-                                                        list.get(0).getStatus()
-                                                )
-                                        )
-                                ),
-                                statusMap -> new ArrayList<>(statusMap.values())
+                                Collectors.groupingBy(Expense::getStatus, Collectors.toList()),
+                                statusMap -> statusMap.values().stream()
+                                        .filter(list -> !list.isEmpty())
+                                        .map(list -> new CategoryExpensesDto(
+                                                list.size(),
+                                                list.stream().map(Expense::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add),
+                                                list.getFirst().getStatus()
+                                        ))
+                                        .toList()
                         )
                 ));
+
+        return new SummaryDto(totalIncome, totalOutgoings, totalBudget, groupedExpenses);
     }
+
+
 
     @Override
-    public Map<Category, List<CategorySummary>> getCurrentYearCategorySummary() {
+    public SummaryDto getSummaryByYear(int year) {
         AppUser user = currentUser();
-        LocalDate now = LocalDate.now();
-        LocalDate startDate = LocalDate.of(now.getYear(), 1, 1);
-        LocalDate endDate = now;
+        LocalDate startDate = LocalDate.of(year, 1, 1);
+        LocalDate endDate = LocalDate.of(year, 12, 31);
 
-        List<Expense> expenses = expenseRepository.findByUserAndDateBetween(user, startDate, endDate);
+        List<Expense> expenses = findExpensesByDateRange(user, startDate, endDate);
 
-        return expenses.stream()
+        BigDecimal totalIncome = userService.getAnnualIncome(year);
+        BigDecimal totalOutgoings = userService.getAnnualOutgoings(year);
+        BigDecimal totalBudget = userService.getAnnualBudget(year);
+
+        Map<Category, List<CategoryExpensesDto>> groupedExpenses = expenses.stream()
                 .collect(Collectors.groupingBy(
-                        Expense::getCategory, // Group by Category enum
+                        Expense::getCategory,
                         Collectors.collectingAndThen(
-                                Collectors.groupingBy(
-                                        Expense::getStatus,
-                                        Collectors.collectingAndThen(
-                                                Collectors.toList(),
-                                                list -> new CategorySummary(
-                                                        list.size(),
-                                                        list.stream().mapToDouble(expense -> expense.getAmount().doubleValue()).sum(),
-                                                        list.get(0).getStatus()
-                                                )
-                                        )
-                                ),
-                                statusMap -> new ArrayList<>(statusMap.values())
+                                Collectors.groupingBy(Expense::getStatus, Collectors.toList()),
+                                statusMap -> statusMap.values().stream()
+                                        .filter(list -> !list.isEmpty())
+                                        .map(list -> new CategoryExpensesDto(
+                                                list.size(),
+                                                list.stream().map(Expense::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add),
+                                                list.getFirst().getStatus()
+                                        ))
+                                        .toList()
                         )
                 ));
+
+        return new SummaryDto(totalIncome, totalOutgoings, totalBudget, groupedExpenses);
     }
+
 
     @Override
     public List<ExpenseDto> findExpensesByFilters(
@@ -178,33 +195,23 @@ public class ExpenseServiceImpl implements ExpenseService {
     ) {
         AppUser user = currentUser();
 
-        LocalDate startDate = (year != null && month != null) ? YearMonth.of(year, month).atDay(1) : LocalDate.of(1970, 1, 1);
-        LocalDate endDate = (year != null && month != null) ? YearMonth.of(year, month).atEndOfMonth() : LocalDate.now();
+        LocalDate startDate;
+        LocalDate endDate;
 
-        List<Expense> expenses = expenseRepository.findByUserAndDateBetween(user, startDate, endDate);
-
-        if (category != null) {
-            expenses = expenses.stream()
-                    .filter(expense -> expense.getCategory() == category)
-                    .collect(Collectors.toList());
-        }
-        if (status != null) {
-            expenses = expenses.stream()
-                    .filter(expense -> expense.getStatus() == status)
-                    .collect(Collectors.toList());
-        }
-        if (currency != null) {
-            expenses = expenses.stream()
-                    .filter(expense -> expense.getCurrency() == currency)
-                    .collect(Collectors.toList());
-        }
-        if (date != null) {
-            expenses = expenses.stream()
-                    .filter(expense -> expense.getDate().equals(date))
-                    .collect(Collectors.toList());
+        if (year != null && month != null) {
+            startDate = LocalDate.of(year, month, 1);
+            endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+        } else if (year != null) {
+            startDate = LocalDate.of(year, 1, 1);
+            endDate = LocalDate.of(year, 12, 31);
+        } else {
+            startDate = LocalDate.of(1970, 1, 1);
+            endDate = LocalDate.now();
         }
 
-        return expenses.isEmpty() ? Collections.emptyList() :
-                expenses.stream().map(expenseMapper::toExpenseDto).toList();
+        List<Expense> expenses = findExpensesByDateRange(user, startDate, endDate);
+        expenses = filterExpenses(expenses, category, status, currency, date);
+
+        return expenses.stream().map(expenseMapper::toExpenseDto).toList();
     }
 }
