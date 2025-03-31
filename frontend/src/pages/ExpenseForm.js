@@ -1,25 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiService from '../services/api';
 import '../styles/ExpenseForm.css';
 import { DateUtils } from '../utils/DateUtils';
 import { CATEGORIES, CURRENCIES } from '../constants/constants';
-import {showConfirmation, showError, showSuccess} from "../utils/SweetAlertUtils";
+import { showConfirmation, showError, showSuccess } from "../utils/SweetAlertUtils";
 
 function ExpenseForm() {
     const today = new Date();
     today.setHours(today.getHours() + 3);
     const formattedDate = today.toISOString().split('T')[0];
+
     const [expense, setExpense] = useState({
         amount: '',
         date: formattedDate,
         category: '',
         status: 'OUTGOING',
         description: '',
-        currency: 'TL',
+        currency: 'TL', // Default currency
     });
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+        async function fetchUserInfo() {
+            try {
+                const userInfo = await apiService.getUserInfo(); // Fetch user info
+                setExpense((prev) => ({ ...prev, currency: userInfo.favoriteCurrency || 'USD' })); // Set favorite currency
+            } catch (err) {
+                console.error('Error fetching user info:', err);
+            }
+        }
+        fetchUserInfo();
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -46,7 +59,7 @@ function ExpenseForm() {
                 ...expense,
                 date: formattedDate,
             };
-            await apiService.createExpense(expenseToSend);
+            await apiService.createExpense(expenseToSend); // Send expense data to server
             showSuccess({ text: 'Transaction added successfully!' });
             navigate('/expenses');
         } catch (err) {
@@ -135,16 +148,6 @@ function ExpenseForm() {
                             Outgoing
                         </button>
                     </div>
-                </div>
-                <div className="form-group full-width">
-                    <label>Description</label>
-                    <textarea
-                        name="description"
-                        value={expense.description}
-                        onChange={handleChange}
-                        placeholder="Add your notes here"
-                        rows="2"
-                    />
                 </div>
                 <div className="form-actions">
                     <button type="button" className="cancel-btn" onClick={() => navigate('/expenses')}>

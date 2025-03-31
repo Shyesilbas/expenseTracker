@@ -45,7 +45,7 @@ public class ExpenseServiceImpl implements ExpenseService {
         expenseRepository.delete(expense);
         return "Expense deleted successfully.";
     }
-    
+
 
     @Override
     public ExpenseDto updateExpense(UpdateExpenseRequest request) {
@@ -83,19 +83,22 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     public ExpenseDto createExpense(ExpenseRequest expenseRequest) {
         AppUser user = currentUser();
+        Currency selectedCurrency = user.getFavoriteCurrency() != null ? user.getFavoriteCurrency() : expenseRequest.currency();
+
         Expense expense = Expense.builder()
                 .amount(expenseRequest.amount())
                 .description(expenseRequest.description())
                 .category(expenseRequest.category())
                 .date(expenseRequest.date())
                 .status(expenseRequest.status())
-                .currency(expenseRequest.currency())
+                .currency(selectedCurrency)
                 .user(user)
                 .build();
 
         expenseRepository.save(expense);
         return expenseMapper.toExpenseDto(expense);
     }
+
 
     @Override
     public ExpenseDto findExpenseById(Long expenseId) {

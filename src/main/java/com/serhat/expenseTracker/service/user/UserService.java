@@ -3,6 +3,7 @@ package com.serhat.expenseTracker.service.user;
 import com.serhat.expenseTracker.dto.objects.UserDto;
 import com.serhat.expenseTracker.dto.requests.RegisterRequest;
 import com.serhat.expenseTracker.entity.AppUser;
+import com.serhat.expenseTracker.entity.enums.Currency;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.math.BigDecimal;
@@ -21,7 +22,7 @@ public interface UserService {
     BigDecimal monthlyOutgoings();
     BigDecimal annualOutgoings();
     BigDecimal annualIncome();
-
+    Currency setfavoriteCurrency(Currency currency);
     BigDecimal getBudgetStatusByYearAndMonth(int year, int month);
     BigDecimal getIncomeByYearAndMonth(int year, int month);
     BigDecimal getOutgoingsByYearAndMonth(int year, int month);

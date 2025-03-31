@@ -13,7 +13,12 @@ function Dashboard() {
     const [currentMonthlyOutgoings, setCurrentMonthlyOutgoings] = useState(0);
     const [annualIncome, setAnnualIncome] = useState(0);
     const [annualOutgoings, setAnnualOutgoings] = useState(0);
+    const [convertedMonthlyBudget, setConvertedMonthlyBudget] = useState(null);
+    const [selectedCurrency, setSelectedCurrency] = useState('USD'); // Default target currency
     const navigate = useNavigate();
+
+    // Example currency list (adjust based on your API)
+    const availableCurrencies = ['USD', 'EUR', 'TRY', 'GBP'];
 
     useEffect(() => {
         let mounted = true;
@@ -30,7 +35,6 @@ function Dashboard() {
                 const annualIncomeData = await apiService.getAnnualIncome();
                 const annualOutgoingsData = await apiService.getAnnualOutgoings();
 
-                // Debugging API responses
                 console.log('Monthly Category Summary:', monthlySummaryData);
                 console.log('Annual Category Summary:', annualSummaryData);
                 console.log('Current Monthly Outgoings:', currentMonthlyOutgoings);
@@ -45,9 +49,6 @@ function Dashboard() {
                     setCurrentMonthlyOutgoings(currentMonthlyOutgoings);
                     setAnnualIncome(annualIncomeData);
                     setAnnualOutgoings(annualOutgoingsData);
-                    // Debugging state after setting
-                    console.log('State after set - Monthly Summary:', monthlySummaryData);
-                    console.log('State after set - Current Monthly Outgoings:', currentMonthlyOutgoings);
                 }
             } catch (err) {
                 console.error('Failed to fetch data:', err);
@@ -61,6 +62,28 @@ function Dashboard() {
         };
     }, []);
 
+    useEffect(() => {
+        const convertMonthlyBudget = async () => {
+            if (monthlyBudget !== null && user?.favoriteCurrency && selectedCurrency !== user.favoriteCurrency) {
+                try {
+                    const converted = await apiService.convertCurrency(
+                        user.favoriteCurrency, // From user's favorite currency
+                        selectedCurrency,      // To selected currency
+                        monthlyBudget          // Amount
+                    );
+                    setConvertedMonthlyBudget(converted);
+                } catch (err) {
+                    console.error('Failed to convert currency:', err);
+                    setConvertedMonthlyBudget(null);
+                }
+            } else {
+                setConvertedMonthlyBudget(null); // No conversion if same currency
+            }
+        };
+
+        convertMonthlyBudget();
+    }, [monthlyBudget, selectedCurrency, user]);
+
     const currentDate = new Date();
     const monthName = currentDate.toLocaleString('en', { month: 'long' });
     const year = currentDate.getFullYear();
@@ -68,14 +91,12 @@ function Dashboard() {
     if (!user) return <div className="dashboard-loading">Loading...</div>;
 
     const renderCategorySummary = (categorySummary, status) => {
-        // Flatten the nested arrays and filter by status
         const filteredSummary = Object.entries(categorySummary)
             .flatMap(([category, summaries]) =>
                 summaries.map(summary => ({ category, ...summary }))
             )
             .filter(summary => summary.status === status);
 
-        // Debugging filtered result
         console.log(`Filtering for ${status}:`, filteredSummary);
 
         return filteredSummary.length > 0 ? (
@@ -84,7 +105,7 @@ function Dashboard() {
                     <li key={`${summary.category}-${index}`} className="category-item">
                         <span className="category-name">{summary.category}</span>
                         <span className="category-details">
-                            {summary.transactionCount} transaction(s) • {summary.totalAmount.toFixed(2)} USD
+                            {summary.transactionCount} transaction(s) • {summary.totalAmount.toFixed(2)} {user.favoriteCurrency}
                         </span>
                     </li>
                 ))}
@@ -94,11 +115,13 @@ function Dashboard() {
         );
     };
 
-    const handleIncomeClick = () => {
+    const handleIncomeClick = (e) => {
+        e.stopPropagation(); // Prevent panel click from triggering
         navigate('/expenses', { state: { status: 'INCOME' } });
     };
 
-    const handleOutgoingsClick = () => {
+    const handleOutgoingsClick = (e) => {
+        e.stopPropagation(); // Prevent panel click from triggering
         navigate('/expenses', { state: { status: 'OUTGOING' } });
     };
 
@@ -110,35 +133,45 @@ function Dashboard() {
                     <div className="panel-header">
                         <h2>Monthly Budget</h2>
                         <span className="panel-subtitle">{monthName} {year}</span>
+                        <div className="currency-converter">
+                            <select
+                                value={selectedCurrency}
+                                onChange={(e) => setSelectedCurrency(e.target.value)}
+                                onClick={(e) => e.stopPropagation()} // Prevent panel click
+                            >
+                                {availableCurrencies.map((currency) => (
+                                    <option key={currency} value={currency}>
+                                        {currency}
+                                    </option>
+                                ))}
+                            </select>
+                            {convertedMonthlyBudget !== null && (
+                                <span className="converted-value">
+                                    ≈ {convertedMonthlyBudget.toFixed(2)} {selectedCurrency}
+                                </span>
+                            )}
+                        </div>
                     </div>
                     <div className="panel-value">
                         <span className={monthlyBudget < 0 ? 'negative' : 'positive'}>
-                            {monthlyBudget !== null ? `${monthlyBudget.toFixed(2)} USD` : 'Loading...'}
+                            {monthlyBudget !== null ? `${monthlyBudget.toFixed(2)} ${user.favoriteCurrency}` : 'Loading...'}
                         </span>
                     </div>
                     <div className="sub-cards">
-                        <div
-                            className="income-card"
-                            onClick={handleIncomeClick}
-                            style={{ cursor: 'pointer' }}
-                        >
+                        <div className="income-card" onClick={handleIncomeClick} style={{ cursor: 'pointer' }}>
                             <h3>Income</h3>
                             <span className="positive">
-                                {currentMonthlyIncome !== null ? `${currentMonthlyIncome.toFixed(2)} USD` : 'Loading...'}
+                                {currentMonthlyIncome !== null ? `${currentMonthlyIncome.toFixed(2)} ${user.favoriteCurrency}` : 'Loading...'}
                             </span>
                             <div className="category-summary">
                                 <h3>Category Breakdown</h3>
                                 {renderCategorySummary(monthlyCategorySummary, 'INCOME')}
                             </div>
                         </div>
-                        <div
-                            className="outgoings-card"
-                            onClick={handleOutgoingsClick}
-                            style={{ cursor: 'pointer' }}
-                        >
+                        <div className="outgoings-card" onClick={handleOutgoingsClick} style={{ cursor: 'pointer' }}>
                             <h3>Outgoings</h3>
                             <span className="negative">
-                                {currentMonthlyOutgoings !== null ? `${currentMonthlyOutgoings.toFixed(2)} USD` : 'Loading...'}
+                                {currentMonthlyOutgoings !== null ? `${currentMonthlyOutgoings.toFixed(2)} ${user.favoriteCurrency}` : 'Loading...'}
                             </span>
                             <div className="category-summary">
                                 <h3>Category Breakdown</h3>
@@ -154,14 +187,14 @@ function Dashboard() {
                     </div>
                     <div className="panel-value">
                         <span className={annualBudget < 0 ? 'negative' : 'positive'}>
-                            {annualBudget !== null ? `${annualBudget.toFixed(2)} USD` : 'Loading...'}
+                            {annualBudget !== null ? `${annualBudget.toFixed(2)} ${user.favoriteCurrency}` : 'Loading...'}
                         </span>
                     </div>
                     <div className="sub-cards">
                         <div className="income-card">
                             <h3>Income</h3>
                             <span className="positive">
-                                {annualIncome !== null ? `${annualIncome.toFixed(2)} USD` : 'Loading...'}
+                                {annualIncome !== null ? `${annualIncome.toFixed(2)} ${user.favoriteCurrency}` : 'Loading...'}
                             </span>
                             <div className="category-summary">
                                 <h3>Category Breakdown</h3>
@@ -171,7 +204,7 @@ function Dashboard() {
                         <div className="outgoings-card">
                             <h3>Outgoings</h3>
                             <span className="negative">
-                                {annualOutgoings !== null ? `${annualOutgoings.toFixed(2)} USD` : 'Loading...'}
+                                {annualOutgoings !== null ? `${annualOutgoings.toFixed(2)} ${user.favoriteCurrency}` : 'Loading...'}
                             </span>
                             <div className="category-summary">
                                 <h3>Category Breakdown</h3>

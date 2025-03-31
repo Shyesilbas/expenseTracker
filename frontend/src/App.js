@@ -7,6 +7,7 @@ import ExpenseList from './pages/expenseList/ExpenseList';
 import SavingsPage from './pages/SavingsPage';
 import CurrencyConversion from './pages/CurrencyConversion';
 import ExpenseForm from './pages/ExpenseForm';
+import Settings from './pages/Settings';
 import Sidebar from './components/Sidebar';
 import React, { useState, useEffect } from 'react';
 import apiService from './services/api';
@@ -66,6 +67,7 @@ function App() {
                     <Route path="/register" element={<Register />} />
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/savings" element={<SavingsPage />} />
+                    <Route path="/settings" element={<Settings />} />
                     <Route path="/expenses" element={<ExpenseList />} />
                     <Route path="/currency/convert" element={<CurrencyConversion />} />
                     <Route path="/expenses/add" element={<ExpenseForm />} />

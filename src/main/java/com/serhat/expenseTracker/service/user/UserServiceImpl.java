@@ -4,6 +4,7 @@ import com.serhat.expenseTracker.dto.objects.UserDto;
 import com.serhat.expenseTracker.dto.requests.RegisterRequest;
 import com.serhat.expenseTracker.entity.AppUser;
 import com.serhat.expenseTracker.entity.Expense;
+import com.serhat.expenseTracker.entity.enums.Currency;
 import com.serhat.expenseTracker.entity.enums.Status;
 import com.serhat.expenseTracker.mapper.UserMapper;
 import com.serhat.expenseTracker.repository.ExpenseRepository;
@@ -32,8 +33,17 @@ public class UserServiceImpl implements UserService {
         AppUser user = getCurrentUser();
         return new UserDto(
                 user.getUsername(),
-                user.getEmail()
+                user.getEmail(),
+                user.getFavoriteCurrency()
         );
+    }
+
+    @Override
+    public Currency setfavoriteCurrency(Currency currency) {
+        AppUser user = getCurrentUser();
+        user.setFavoriteCurrency(currency);
+        userRepository.save(user);
+        return user.getFavoriteCurrency();
     }
 
     @Override

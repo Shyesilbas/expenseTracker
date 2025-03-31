@@ -23,10 +23,15 @@ function Sidebar({ onLogout, isOpen }) {
                         <button className="sidebar-item" onClick={() => navigate('/expenses')}>Transactions</button>
                     </li>
                     <li>
-                        <button className="sidebar-item" onClick={() => navigate('/currency/convert')}>Currency Converter</button>
+                        <button className="sidebar-item" onClick={() => navigate('/currency/convert')}>Currency
+                            Converter
+                        </button>
                     </li>
                     <li>
                         <button className="sidebar-item" onClick={() => navigate('/savings')}>Savings Page</button>
+                    </li>
+                    <li>
+                        <button className="sidebar-item" onClick={() => navigate('/settings')}>Settings Page</button>
                     </li>
                     <li>
                         <button className="sidebar-item" onClick={onLogout}>

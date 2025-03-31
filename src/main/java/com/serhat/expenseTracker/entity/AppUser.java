@@ -1,5 +1,6 @@
 package com.serhat.expenseTracker.entity;
 
+import com.serhat.expenseTracker.entity.enums.Currency;
 import com.serhat.expenseTracker.entity.enums.MembershipPlan;
 import com.serhat.expenseTracker.entity.enums.Role;
 import jakarta.persistence.*;
@@ -27,6 +28,8 @@ public class AppUser implements UserDetails {
     private String username;
     private String password;
     private String email;
+
+    private Currency favoriteCurrency;
 
     @Enumerated(EnumType.STRING)
     private MembershipPlan membershipPlan;

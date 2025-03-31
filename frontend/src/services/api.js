@@ -248,6 +248,14 @@ class ApiService {
             throw error.response?.data || error.message;
         }
     }
+    async setFavCurrency(currency) {
+        try {
+            const response = await this.api.post('/api/settings/setFavCurrency', { currency });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
 
 }
 

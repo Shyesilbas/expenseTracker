@@ -179,6 +179,38 @@
     padding-bottom: 4px;
 }
 
+.currency-converter {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.currency-converter select {
+    font-size: 0.85rem;
+    padding: 4px 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: #f9fafc;
+    color: #4a5568;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.currency-converter select:hover,
+.currency-converter select:focus {
+    border-color: #5a67d8;
+    outline: none;
+}
+
+.converted-value {
+    font-size: 0.8rem;
+    color: #718096;
+    font-style: italic;
+}
+
 .category-summary ul {
     list-style: none;
     padding: 0;
