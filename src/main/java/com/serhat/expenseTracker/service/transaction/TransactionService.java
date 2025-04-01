@@ -20,6 +20,7 @@ public interface TransactionService {
     TransactionDto findTransactionById(Long transactionId);
     SummaryDto getSummaryByYearAndMonth(int year, int month);
     SummaryDto getSummaryByYear(int year);
+    List<TransactionDto> getRecurringTransactions();
     List<TransactionDto> findTransactionsByFilters(
             Integer year,
             Integer month,

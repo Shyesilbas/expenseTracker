@@ -93,6 +93,25 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    public List<TransactionDto> getRecurringTransactions() {
+        AppUser user = currentUser();
+        List<Transaction> recurringTransactions = transactionRepository.findByUserAndType(user, TransactionType.RECURRING);
+
+        Map<String, Transaction> uniqueRecurringTransactions = recurringTransactions.stream()
+                .collect(Collectors.toMap(
+                        transaction -> transaction.getStartMonth() + "-" + transaction.getStartYear() + "-" +
+                                transaction.getEndMonth() + "-" + transaction.getEndYear() + "-" +
+                                transaction.getDayOfMonth(),
+                        transaction -> transaction,
+                        (existing, replacement) -> existing
+                ));
+
+        return uniqueRecurringTransactions.values().stream()
+                .map(transactionMapper::toTransactionDto)
+                .toList();
+    }
+
+    @Override
     public TransactionDto createTransaction(TransactionRequest expenseRequest) {
         AppUser user = currentUser();
         Currency selectedCurrency = user.getFavoriteCurrency() != null ? user.getFavoriteCurrency() : expenseRequest.currency();

@@ -35,6 +35,11 @@ public class TransactionController {
         return ResponseEntity.ok(expense);
     }
 
+    @GetMapping("/recurring")
+    public ResponseEntity<List<TransactionDto>> getRecurringTransactions() {
+        return ResponseEntity.ok(transactionService.getRecurringTransactions());
+    }
+
     @DeleteMapping("/delete/{transactionId}")
     public ResponseEntity<String> deleteExpense(@PathVariable Long transactionId) {
         return ResponseEntity.ok(transactionService.deleteTransaction(transactionId));

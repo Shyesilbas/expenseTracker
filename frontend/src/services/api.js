@@ -147,6 +147,15 @@ class ApiService {
         }
     }
 
+    async getRecurringTransactions() {
+        try {
+            const response = await this.api.get('/api/expenses/recurring');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
     async convertCurrency(from, to, amount) {
         try {
             const response = await this.api.get('/api/currency/convert', {

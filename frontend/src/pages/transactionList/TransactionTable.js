@@ -3,17 +3,18 @@ import { CATEGORIES, STATUSES, CURRENCIES } from '../../constants/constants';
 import { DateUtils } from '../../utils/DateUtils';
 
 function TransactionTable({
-                          expenses,
-                          loading,
-                          editingExpenseId,
-                          editForm,
-                          setEditForm,
-                          setEditingExpenseId,
-                          onUpdateExpense,
-                          onDeleteExpense
-                      }) {
+                              transactions,
+                              loading,
+                              editingTransactionId,
+                              editForm,
+                              setEditForm,
+                              setEditingTransactionId,
+                              onUpdateTransaction,
+                              onDeleteTransaction,
+                              showUpdateButton = () => true
+                          }) {
     const resetEditForm = () => {
-        setEditingExpenseId(null);
+        setEditingTransactionId(null);
         setEditForm({
             amount: '',
             currency: '',
@@ -24,15 +25,15 @@ function TransactionTable({
         });
     };
 
-    const startEditing = (expense) => {
-        setEditingExpenseId(expense.expenseId);
+    const startEditing = (transaction) => {
+        setEditingTransactionId(transaction.transactionId);
         setEditForm({
-            amount: expense.amount || '',
-            currency: expense.currency || '',
-            status: expense.status || '',
-            description: expense.description || '',
-            category: expense.category || '',
-            date: DateUtils.formatDate(expense.date, true) || '',
+            amount: transaction.amount || '',
+            currency: transaction.currency || '',
+            status: transaction.status || '',
+            description: transaction.description || '',
+            category: transaction.category || '',
+            date: DateUtils.formatDate(transaction.date, true) || '',
         });
     };
 
@@ -59,13 +60,13 @@ function TransactionTable({
     };
 
     return (
-        <div className="expense-table-container">
+        <div className="transaction-table-container">
             {loading ? (
-                <p className="loading-message">Loading expenses...</p>
-            ) : expenses.length === 0 ? (
-                <p className="no-data">No expenses found for this period.</p>
+                <p className="loading-message">Loading transactions...</p>
+            ) : transactions.length === 0 ? (
+                <p className="no-data">No transactions found for this period.</p>
             ) : (
-                <table className="expense-table">
+                <table className="transaction-table">
                     <thead>
                     <tr>
                         <th>Date</th>
@@ -78,9 +79,9 @@ function TransactionTable({
                     </tr>
                     </thead>
                     <tbody>
-                    {expenses.map((expense) => (
-                        <tr key={expense.expenseId}>
-                            {editingExpenseId === expense.expenseId ? (
+                    {transactions.map((transaction) => (
+                        <tr key={transaction.transactionId}>
+                            {editingTransactionId === transaction.transactionId ? (
                                 <>
                                     <td>{renderEditField('date', 'date')}</td>
                                     <td>{renderEditField('number', 'amount')}</td>
@@ -91,7 +92,7 @@ function TransactionTable({
                                     <td>
                                         <button
                                             className="update-btn"
-                                            onClick={() => onUpdateExpense(expense.expenseId)}
+                                            onClick={() => onUpdateTransaction(transaction.transactionId)}
                                         >
                                             Save
                                         </button>
@@ -105,24 +106,26 @@ function TransactionTable({
                                 </>
                             ) : (
                                 <>
-                                    <td>{expense.date}</td>
-                                    <td className={expense.status === 'OUTGOING' ? 'outgoing' : 'incoming'}>
-                                        {expense.amount}
+                                    <td>{transaction.date}</td>
+                                    <td className={transaction.status === 'OUTGOING' ? 'outgoing' : 'incoming'}>
+                                        {transaction.amount}
                                     </td>
-                                    <td>{expense.currency}</td>
-                                    <td>{expense.description || '-'}</td>
-                                    <td>{expense.category}</td>
-                                    <td>{expense.status}</td>
+                                    <td>{transaction.currency}</td>
+                                    <td>{transaction.description || '-'}</td>
+                                    <td>{transaction.category}</td>
+                                    <td>{transaction.status}</td>
                                     <td>
-                                        <button
-                                            className="update-btn"
-                                            onClick={() => startEditing(expense)}
-                                        >
-                                            Update
-                                        </button>
+                                        {showUpdateButton(transaction) && (
+                                            <button
+                                                className="update-btn"
+                                                onClick={() => startEditing(transaction)}
+                                            >
+                                                Update
+                                            </button>
+                                        )}
                                         <button
                                             className="delete-btn"
-                                            onClick={() => onDeleteExpense(expense.expenseId)}
+                                            onClick={() => onDeleteTransaction(transaction.transactionId)}
                                         >
                                             Delete
                                         </button>

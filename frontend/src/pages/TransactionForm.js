@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import apiService from '../services/api';
-import '../styles/ExpenseForm.css';
+import '../styles/TransactionForm.css';
 import { DateUtils } from '../utils/DateUtils';
 import { CATEGORIES, CURRENCIES } from '../constants/constants';
 import { showConfirmation, showError, showSuccess } from "../utils/SweetAlertUtils";
@@ -12,7 +12,7 @@ function TransactionForm() {
     const formattedDate = today.toISOString().split('T')[0];
 
     const [activeTab, setActiveTab] = useState('oneTime');
-    const [oneTimeExpense, setOneTimeExpense] = useState({
+    const [oneTimeTransaction, setOneTimeTransaction] = useState({
         amount: '',
         date: formattedDate,
         category: '',
@@ -21,7 +21,7 @@ function TransactionForm() {
         currency: 'TL',
     });
 
-    const [recurringExpense, setRecurringExpense] = useState({
+    const [recurringTransaction, setRecurringTransaction] = useState({
         amount: '',
         category: '',
         status: 'OUTGOING',
@@ -31,7 +31,7 @@ function TransactionForm() {
         startYear: '',
         endMonth: '',
         endYear: '',
-        dayOfMonth: '', // Yeni alan eklendi
+        dayOfMonth: '',
     });
 
     const navigate = useNavigate();
@@ -41,8 +41,8 @@ function TransactionForm() {
             try {
                 const userInfo = await apiService.getUserInfo();
                 const favoriteCurrency = userInfo.favoriteCurrency || 'USD';
-                setOneTimeExpense((prev) => ({ ...prev, currency: favoriteCurrency }));
-                setRecurringExpense((prev) => ({ ...prev, currency: favoriteCurrency }));
+                setOneTimeTransaction((prev) => ({ ...prev, currency: favoriteCurrency }));
+                setRecurringTransaction((prev) => ({ ...prev, currency: favoriteCurrency }));
             } catch (err) {
                 console.error('Error fetching user info:', err);
             }
@@ -52,7 +52,7 @@ function TransactionForm() {
 
     const handleOneTimeChange = (e) => {
         const { name, value } = e.target;
-        setOneTimeExpense((prevState) => ({
+        setOneTimeTransaction((prevState) => ({
             ...prevState,
             [name]: value,
         }));
@@ -60,7 +60,7 @@ function TransactionForm() {
 
     const handleRecurringChange = (e) => {
         const { name, value } = e.target;
-        setRecurringExpense((prevState) => ({
+        setRecurringTransaction((prevState) => ({
             ...prevState,
             [name]: value,
         }));
@@ -78,13 +78,13 @@ function TransactionForm() {
         if (!confirmed) return;
 
         try {
-            const formattedDate = DateUtils.formatDate(oneTimeExpense.date);
-            const expenseToSend = {
-                ...oneTimeExpense,
+            const formattedDate = DateUtils.formatDate(oneTimeTransaction.date);
+            const transactionToSend = {
+                ...oneTimeTransaction,
                 date: formattedDate,
                 transactionType: 'ONE_TIME',
             };
-            await apiService.createTransaction(expenseToSend);
+            await apiService.createTransaction(transactionToSend);
             showSuccess({ text: 'One-time transaction added successfully!' });
             navigate('/transactions');
         } catch (err) {
@@ -106,16 +106,16 @@ function TransactionForm() {
         if (!confirmed) return;
 
         try {
-            const expenseToSend = {
-                ...recurringExpense,
+            const transactionToSend = {
+                ...recurringTransaction,
                 transactionType: 'RECURRING',
-                startMonth: parseInt(recurringExpense.startMonth, 10),
-                startYear: parseInt(recurringExpense.startYear, 10),
-                endMonth: parseInt(recurringExpense.endMonth, 10),
-                endYear: parseInt(recurringExpense.endYear, 10),
-                dayOfMonth: recurringExpense.dayOfMonth ? parseInt(recurringExpense.dayOfMonth, 10) : undefined, // Yeni alan eklendi
+                startMonth: parseInt(recurringTransaction.startMonth, 10),
+                startYear: parseInt(recurringTransaction.startYear, 10),
+                endMonth: parseInt(recurringTransaction.endMonth, 10),
+                endYear: parseInt(recurringTransaction.endYear, 10),
+                dayOfMonth: recurringTransaction.dayOfMonth ? parseInt(recurringTransaction.dayOfMonth, 10) : undefined,
             };
-            await apiService.createTransaction(expenseToSend);
+            await apiService.createTransaction(transactionToSend);
             showSuccess({ text: 'Recurring transaction added successfully!' });
             navigate('/transactions');
         } catch (err) {
@@ -126,16 +126,16 @@ function TransactionForm() {
     };
 
     return (
-        <div className="modern-expense-form-container">
-            <div className="tab-header">
+        <div className="transaction-form-container">
+            <div className="transaction-tabs">
                 <button
-                    className={`tab-btn ${activeTab === 'oneTime' ? 'active' : ''}`}
+                    className={`transaction-tab-btn ${activeTab === 'oneTime' ? 'active' : ''}`}
                     onClick={() => setActiveTab('oneTime')}
                 >
-                    One Time Transaction
+                    One-Time Transaction
                 </button>
                 <button
-                    className={`tab-btn ${activeTab === 'recurring' ? 'active' : ''}`}
+                    className={`transaction-tab-btn ${activeTab === 'recurring' ? 'active' : ''}`}
                     onClick={() => setActiveTab('recurring')}
                 >
                     Recurring Transaction
@@ -143,25 +143,25 @@ function TransactionForm() {
             </div>
 
             {activeTab === 'oneTime' && (
-                <form onSubmit={handleOneTimeSubmit} className="modern-expense-form">
-                    <div className="form-row">
-                        <div className="form-group">
+                <form onSubmit={handleOneTimeSubmit} className="transaction-form">
+                    <div className="transaction-form-row">
+                        <div className="transaction-form-group">
                             <label>Amount</label>
                             <input
                                 type="number"
                                 name="amount"
-                                value={oneTimeExpense.amount}
+                                value={oneTimeTransaction.amount}
                                 onChange={handleOneTimeChange}
                                 required
                                 step="0.01"
                                 placeholder="0.00"
                             />
                         </div>
-                        <div className="form-group">
+                        <div className="transaction-form-group">
                             <label>Currency</label>
                             <select
                                 name="currency"
-                                value={oneTimeExpense.currency}
+                                value={oneTimeTransaction.currency}
                                 onChange={handleOneTimeChange}
                                 required
                             >
@@ -173,22 +173,22 @@ function TransactionForm() {
                             </select>
                         </div>
                     </div>
-                    <div className="form-group full-width">
+                    <div className="transaction-form-group full-width">
                         <label>Date</label>
                         <input
                             type="date"
                             name="date"
-                            value={oneTimeExpense.date}
+                            value={oneTimeTransaction.date}
                             onChange={handleOneTimeChange}
                             required
                         />
                     </div>
-                    <div className="form-row">
-                        <div className="form-group">
+                    <div className="transaction-form-row">
+                        <div className="transaction-form-group full-width">
                             <label>Category</label>
                             <select
                                 name="category"
-                                value={oneTimeExpense.category}
+                                value={oneTimeTransaction.category}
                                 onChange={handleOneTimeChange}
                                 required
                             >
@@ -201,64 +201,64 @@ function TransactionForm() {
                             </select>
                         </div>
                     </div>
-                    <div className="form-group full-width">
+                    <div className="transaction-form-group full-width">
                         <label>Description</label>
                         <textarea
                             name="description"
-                            value={oneTimeExpense.description}
+                            value={oneTimeTransaction.description}
                             onChange={handleOneTimeChange}
                             placeholder="Enter a description"
                             rows="3"
                         />
                     </div>
-                    <div className="form-group full-width">
+                    <div className="transaction-form-group full-width">
                         <label>Status</label>
-                        <div className="status-toggle">
+                        <div className="transaction-status-toggle">
                             <button
                                 type="button"
-                                className={`toggle-btn ${oneTimeExpense.status === 'INCOME' ? 'active' : ''}`}
-                                onClick={() => setOneTimeExpense((prev) => ({ ...prev, status: 'INCOME' }))}
+                                className={`transaction-toggle-btn ${oneTimeTransaction.status === 'INCOME' ? 'active' : ''}`}
+                                onClick={() => setOneTimeTransaction((prev) => ({ ...prev, status: 'INCOME' }))}
                             >
                                 Income
                             </button>
                             <button
                                 type="button"
-                                className={`toggle-btn ${oneTimeExpense.status === 'OUTGOING' ? 'active' : ''}`}
-                                onClick={() => setOneTimeExpense((prev) => ({ ...prev, status: 'OUTGOING' }))}
+                                className={`transaction-toggle-btn ${oneTimeTransaction.status === 'OUTGOING' ? 'active' : ''}`}
+                                onClick={() => setOneTimeTransaction((prev) => ({ ...prev, status: 'OUTGOING' }))}
                             >
                                 Outgoing
                             </button>
                         </div>
                     </div>
-                    <div className="form-actions">
-                        <button type="button" className="cancel-btn" onClick={() => navigate('/transactions')}>
+                    <div className="transaction-form-actions">
+                        <button type="button" className="transaction-cancel-btn" onClick={() => navigate('/transactions')}>
                             Cancel
                         </button>
-                        <button type="submit" className="submit-btn">Save One-Time Transaction</button>
+                        <button type="submit" className="transaction-submit-btn">Save One-Time Transaction</button>
                     </div>
                 </form>
             )}
 
             {activeTab === 'recurring' && (
-                <form onSubmit={handleRecurringSubmit} className="modern-expense-form">
-                    <div className="form-row">
-                        <div className="form-group">
+                <form onSubmit={handleRecurringSubmit} className="transaction-form">
+                    <div className="transaction-form-row">
+                        <div className="transaction-form-group">
                             <label>Amount</label>
                             <input
                                 type="number"
                                 name="amount"
-                                value={recurringExpense.amount}
+                                value={recurringTransaction.amount}
                                 onChange={handleRecurringChange}
                                 required
                                 step="0.01"
                                 placeholder="0.00"
                             />
                         </div>
-                        <div className="form-group">
+                        <div className="transaction-form-group">
                             <label>Currency</label>
                             <select
                                 name="currency"
-                                value={recurringExpense.currency}
+                                value={recurringTransaction.currency}
                                 onChange={handleRecurringChange}
                                 required
                             >
@@ -270,13 +270,13 @@ function TransactionForm() {
                             </select>
                         </div>
                     </div>
-                    <div className="form-row">
-                        <div className="form-group">
+                    <div className="transaction-form-row">
+                        <div className="transaction-form-group">
                             <label>Start Month</label>
                             <input
                                 type="number"
                                 name="startMonth"
-                                value={recurringExpense.startMonth}
+                                value={recurringTransaction.startMonth}
                                 onChange={handleRecurringChange}
                                 required
                                 min="1"
@@ -284,12 +284,12 @@ function TransactionForm() {
                                 placeholder="1-12"
                             />
                         </div>
-                        <div className="form-group">
+                        <div className="transaction-form-group">
                             <label>Start Year</label>
                             <input
                                 type="number"
                                 name="startYear"
-                                value={recurringExpense.startYear}
+                                value={recurringTransaction.startYear}
                                 onChange={handleRecurringChange}
                                 required
                                 min="2000"
@@ -298,13 +298,13 @@ function TransactionForm() {
                             />
                         </div>
                     </div>
-                    <div className="form-row">
-                        <div className="form-group">
+                    <div className="transaction-form-row">
+                        <div className="transaction-form-group">
                             <label>End Month</label>
                             <input
                                 type="number"
                                 name="endMonth"
-                                value={recurringExpense.endMonth}
+                                value={recurringTransaction.endMonth}
                                 onChange={handleRecurringChange}
                                 required
                                 min="1"
@@ -312,12 +312,12 @@ function TransactionForm() {
                                 placeholder="1-12"
                             />
                         </div>
-                        <div className="form-group">
+                        <div className="transaction-form-group">
                             <label>End Year</label>
                             <input
                                 type="number"
                                 name="endYear"
-                                value={recurringExpense.endYear}
+                                value={recurringTransaction.endYear}
                                 onChange={handleRecurringChange}
                                 required
                                 min="2000"
@@ -326,24 +326,24 @@ function TransactionForm() {
                             />
                         </div>
                     </div>
-                    <div className="form-row">
-                        <div className="form-group">
+                    <div className="transaction-form-row">
+                        <div className="transaction-form-group">
                             <label>Day of Month</label>
                             <input
                                 type="number"
                                 name="dayOfMonth"
-                                value={recurringExpense.dayOfMonth}
+                                value={recurringTransaction.dayOfMonth}
                                 onChange={handleRecurringChange}
                                 min="1"
                                 max="31"
                                 placeholder="1-31"
                             />
                         </div>
-                        <div className="form-group">
+                        <div className="transaction-form-group">
                             <label>Category</label>
                             <select
                                 name="category"
-                                value={recurringExpense.category}
+                                value={recurringTransaction.category}
                                 onChange={handleRecurringChange}
                                 required
                             >
@@ -356,40 +356,40 @@ function TransactionForm() {
                             </select>
                         </div>
                     </div>
-                    <div className="form-group full-width">
+                    <div className="transaction-form-group full-width">
                         <label>Description</label>
                         <textarea
                             name="description"
-                            value={recurringExpense.description}
+                            value={recurringTransaction.description}
                             onChange={handleRecurringChange}
                             placeholder="Enter a description"
                             rows="3"
                         />
                     </div>
-                    <div className="form-group full-width">
+                    <div className="transaction-form-group full-width">
                         <label>Status</label>
-                        <div className="status-toggle">
+                        <div className="transaction-status-toggle">
                             <button
                                 type="button"
-                                className={`toggle-btn ${recurringExpense.status === 'INCOME' ? 'active' : ''}`}
-                                onClick={() => setRecurringExpense((prev) => ({ ...prev, status: 'INCOME' }))}
+                                className={`transaction-toggle-btn ${recurringTransaction.status === 'INCOME' ? 'active' : ''}`}
+                                onClick={() => setRecurringTransaction((prev) => ({ ...prev, status: 'INCOME' }))}
                             >
                                 Income
                             </button>
                             <button
                                 type="button"
-                                className={`toggle-btn ${recurringExpense.status === 'OUTGOING' ? 'active' : ''}`}
-                                onClick={() => setRecurringExpense((prev) => ({ ...prev, status: 'OUTGOING' }))}
+                                className={`transaction-toggle-btn ${recurringTransaction.status === 'OUTGOING' ? 'active' : ''}`}
+                                onClick={() => setRecurringTransaction((prev) => ({ ...prev, status: 'OUTGOING' }))}
                             >
                                 Outgoing
                             </button>
                         </div>
                     </div>
-                    <div className="form-actions">
-                        <button type="button" className="cancel-btn" onClick={() => navigate('/transactions')}>
+                    <div className="transaction-form-actions">
+                        <button type="button" className="transaction-cancel-btn" onClick={() => navigate('/transactions')}>
                             Cancel
                         </button>
-                        <button type="submit" className="submit-btn">Save Recurring Transaction</button>
+                        <button type="submit" className="transaction-submit-btn">Save Recurring Transaction</button>
                     </div>
                 </form>
             )}

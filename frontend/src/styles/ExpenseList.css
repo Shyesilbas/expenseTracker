@@ -16,7 +16,7 @@
     --transition: all 0.2s ease;
 }
 
-.expense-list-container {
+.transaction-list-container {
     max-width: 1200px;
     margin: 2.5rem auto;
     padding: 2rem;
@@ -26,7 +26,7 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-.expense-list-container h1 {
+.transaction-list-container h1 {
     font-size: 1.875rem;
     font-weight: 700;
     color: var(--text-primary);
@@ -126,7 +126,7 @@
     font-weight: 600;
 }
 
-.expense-table-container {
+.transaction-table-container {
     overflow-x: auto;
     border-radius: var(--radius-lg);
     background: var(--bg-light);
@@ -134,21 +134,21 @@
     box-shadow: var(--shadow-sm);
 }
 
-.expense-table {
+.transaction-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
 }
 
-.expense-table th,
-.expense-table td {
+.transaction-table th,
+.transaction-table td {
     padding: 1rem;
     text-align: center;
     font-size: 0.95rem;
     color: var(--text-secondary);
 }
 
-.expense-table th {
+.transaction-table th {
     background: rgba(79, 70, 229, 0.05);
     color: var(--text-primary);
     font-weight: 600;
@@ -159,38 +159,38 @@
     z-index: 10;
 }
 
-.expense-table th:first-child {
+.transaction-table th:first-child {
     border-top-left-radius: var(--radius-md);
 }
 
-.expense-table th:last-child {
+.transaction-table th:last-child {
     border-top-right-radius: var(--radius-md);
 }
 
-.expense-table td {
+.transaction-table td {
     border-bottom: 1px solid var(--border);
 }
 
-.expense-table tbody tr {
+.transaction-table tbody tr {
     transition: var(--transition);
 }
 
-.expense-table tbody tr:hover {
+.transaction-table tbody tr:hover {
     background: rgba(79, 70, 229, 0.05);
 }
 
-.expense-table td.incoming {
+.transaction-table td.incoming {
     color: var(--success);
     font-weight: 600;
 }
 
-.expense-table td.outgoing {
+.transaction-table td.outgoing {
     color: var(--danger);
     font-weight: 600;
 }
 
-.expense-table input,
-.expense-table select {
+.transaction-table input,
+.transaction-table select {
     padding: 0.625rem 0.875rem;
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
@@ -200,14 +200,14 @@
     transition: var(--transition);
 }
 
-.expense-table input:focus,
-.expense-table select:focus {
+.transaction-table input:focus,
+.transaction-table select:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
 }
 
-.expense-table .update-btn {
+.transaction-table .update-btn {
     background: var(--primary);
     color: white;
     border: none;
@@ -220,14 +220,14 @@
     margin-right: 0.375rem;
 }
 
-.expense-table .update-btn:hover {
+.transaction-table .update-btn:hover {
     background: var(--primary-hover);
     transform: translateY(-1px);
     box-shadow: var(--shadow-sm);
 }
 
-.expense-table .delete-btn,
-.expense-table .cancel-btn {
+.transaction-table .delete-btn,
+.transaction-table .cancel-btn {
     background: var(--danger);
     color: white;
     border: none;
@@ -239,8 +239,8 @@
     transition: var(--transition);
 }
 
-.expense-table .delete-btn:hover,
-.expense-table .cancel-btn:hover {
+.transaction-table .delete-btn:hover,
+.transaction-table .cancel-btn:hover {
     background: #dc2626;
     transform: translateY(-1px);
     box-shadow: var(--shadow-sm);
@@ -324,7 +324,7 @@
 }
 
 @media (max-width: 768px) {
-    .expense-list-container {
+    .transaction-list-container {
         margin: 1rem;
         padding: 1.25rem;
     }
@@ -363,15 +363,15 @@
         height: 260px;
     }
 
-    .expense-table th,
-    .expense-table td {
+    .transaction-table th,
+    .transaction-table td {
         padding: 0.75rem;
         font-size: 0.875rem;
     }
 
-    .expense-table .update-btn,
-    .expense-table .delete-btn,
-    .expense-table .cancel-btn {
+    .transaction-table .update-btn,
+    .transaction-table .delete-btn,
+    .transaction-table .cancel-btn {
         padding: 0.375rem 0.625rem;
         font-size: 0.8125rem;
     }

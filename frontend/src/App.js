@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Register from './pages/Register';
 import TransactionList from './pages/transactionList/TransactionList';
 import SavingsPage from './pages/SavingsPage';
+import RecurringTransactions from './pages/RecurringTransactions';
 import CurrencyConversion from './pages/CurrencyConversion';
 import TransactionForm from './pages/TransactionForm';
 import Settings from './pages/Settings';
@@ -69,6 +70,7 @@ function App() {
                     <Route path="/savings" element={<SavingsPage />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/transactions" element={<TransactionList />} />
+                    <Route path="/transactions/recurring" element={<RecurringTransactions />} />
                     <Route path="/currency/convert" element={<CurrencyConversion />} />
                     <Route path="/transactions/add" element={<TransactionForm />} />
                 </Routes>

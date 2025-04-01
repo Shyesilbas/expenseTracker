@@ -23,6 +23,9 @@ function Sidebar({ onLogout, isOpen }) {
                         <button className="sidebar-item" onClick={() => navigate('/transactions')}>Transactions</button>
                     </li>
                     <li>
+                        <button className="sidebar-item" onClick={() => navigate('/transactions/recurring')}>Recurring Transactions</button>
+                    </li>
+                    <li>
                         <button className="sidebar-item" onClick={() => navigate('/currency/convert')}>Currency
                             Converter
                         </button>

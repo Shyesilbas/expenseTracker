@@ -14,7 +14,7 @@ import { showConfirmation, showError, showSuccess } from "../../utils/SweetAlert
 function TransactionList() {
     const currentDate = new Date();
     const location = useLocation();
-    const [expenses, setExpenses] = useState([]);
+    const [transactions, setTransactions] = useState([]);
     const [financialData, setFinancialData] = useState({
         monthlyBudget: null,
         totalIncome: 0.00,
@@ -28,7 +28,7 @@ function TransactionList() {
         currency: '',
         date: '',
     });
-    const [editingExpenseId, setEditingExpenseId] = useState(null);
+    const [editingTransactionId, setEditingTransactionId] = useState(null);
     const [editForm, setEditForm] = useState({
         amount: '',
         currency: '',
@@ -52,15 +52,15 @@ function TransactionList() {
             };
 
             const monthlySummary = await apiService.getMonthlySummary(year, month);
-            const expenseData = await apiService.getExpensesByFilters(
+            const transactionData = await apiService.getExpensesByFilters(
                 Object.fromEntries(
                     Object.entries(formattedFilters).map(([key, value]) => [key, value || undefined])
                 )
             );
 
-            const formattedExpenses = expenseData.map(expense => ({
-                ...expense,
-                date: DateUtils.formatDate(expense.date, 'dd-MM-yyyy'),
+            const formattedTransactions = transactionData.map(transaction => ({
+                ...transaction,
+                date: DateUtils.formatDate(transaction.date, 'dd-MM-yyyy'),
             }));
 
             setFinancialData({
@@ -68,7 +68,7 @@ function TransactionList() {
                 totalIncome: monthlySummary?.totalIncome ?? 0.00,
                 totalSpent: monthlySummary?.totalOutgoings ?? 0.00,
             });
-            setExpenses(formattedExpenses || []);
+            setTransactions(formattedTransactions || []);
         } catch (err) {
             console.error('Failed to fetch data:', err);
             setError('Failed to load data. Please try again.');
@@ -84,10 +84,10 @@ function TransactionList() {
         return () => debouncedFetchData.cancel();
     }, [debouncedFetchData]);
 
-    const handleDeleteExpense = async (transactionId) => {
+    const handleDeleteTransaction = async (transactionId) => {
         const confirmed = await showConfirmation({
             title: 'Are you sure?',
-            text: 'Do you really want to delete this expense?',
+            text: 'Do you really want to delete this transaction?',
             confirmButtonText: 'Yes, delete it!',
         });
 
@@ -95,17 +95,17 @@ function TransactionList() {
 
         try {
             await deleteTransaction(transactionId);
-            showSuccess({ text: 'Expense deleted successfully!' });
+            showSuccess({ text: 'Transaction deleted successfully!' });
             fetchData();
         } catch (error) {
             showError({ text: error.message });
         }
     };
 
-    const handleUpdateExpense = async (transactionId) => {
+    const handleUpdateTransaction = async (transactionId) => {
         const confirmed = await showConfirmation({
-            title: 'Update Expense',
-            text: 'Are you sure you want to update this expense?',
+            title: 'Update Transaction',
+            text: 'Are you sure you want to update this transaction?',
             confirmButtonText: 'Yes, update it!',
         });
 
@@ -114,11 +114,11 @@ function TransactionList() {
         try {
             const formattedEditForm = {
                 ...editForm,
-                date: editForm.date ? DateUtils.parseDate(editForm.date, 'dd-MM-yyyy') : undefined, // Backend'e uygun format
+                date: editForm.date ? DateUtils.parseDate(editForm.date, 'dd-MM-yyyy') : undefined,
             };
             await updateTransaction(transactionId, formattedEditForm);
-            showSuccess({ text: 'Expense updated successfully!' });
-            setEditingExpenseId(null);
+            showSuccess({ text: 'Transaction updated successfully!' });
+            setEditingTransactionId(null);
             setEditForm({
                 amount: '',
                 currency: '',
@@ -150,7 +150,7 @@ function TransactionList() {
     }, [location.state?.status]);
 
     return (
-        <div className="expense-list-container">
+        <div className="transaction-list-container">
             <h1>All Transactions - {DateUtils.getCurrentMonthYear(filters.year, filters.month)}</h1>
 
             <Filters
@@ -169,24 +169,25 @@ function TransactionList() {
             />
 
             <TransactionTable
-                expenses={expenses}
+                transactions={transactions}
                 loading={loading}
-                editingExpenseId={editingExpenseId}
+                editingTransactionId={editingTransactionId}
                 editForm={editForm}
                 setEditForm={setEditForm}
-                setEditingExpenseId={setEditingExpenseId}
-                onUpdateExpense={handleUpdateExpense}
-                onDeleteExpense={handleDeleteExpense}
+                setEditingTransactionId={setEditingTransactionId}
+                onUpdateTransaction={handleUpdateTransaction}
+                onDeleteTransaction={handleDeleteTransaction}
+                showUpdateButton={(transaction) => transaction.type !== 'RECURRING'} // RECURRING için update gizle
             />
 
             <div className="chart-container-wrapper">
                 <div className="chart-container">
-                    <h2>Expense Distribution by Category</h2>
-                    <PieChart data={expenses.filter((exp) => exp.status === 'OUTGOING')} title="Expenses" />
+                    <h2>Transaction Distribution by Category (Outgoing)</h2>
+                    <PieChart data={transactions.filter((tx) => tx.status === 'OUTGOING')} title="Outgoing" />
                 </div>
                 <div className="chart-container">
-                    <h2>Income Distribution by Category</h2>
-                    <PieChart data={expenses.filter((exp) => exp.status === 'INCOME')} title="Income" />
+                    <h2>Transaction Distribution by Category (Income)</h2>
+                    <PieChart data={transactions.filter((tx) => tx.status === 'INCOME')} title="Income" />
                 </div>
             </div>
         </div>

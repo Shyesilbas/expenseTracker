@@ -1,15 +1,22 @@
 export const DateUtils = {
     formatDate: (date, format = 'dd-MM-yyyy') => {
-        if (!date) return '';
+        if (!date || !(date instanceof Date || typeof date === 'string')) {
+            console.warn("Invalid date provided:", date);
+            return '';
+        }
         const d = new Date(date);
+        if (isNaN(d.getTime())) {
+            console.error("Invalid Date object:", date);
+            return '';
+        }
         const day = String(d.getDate()).padStart(2, '0');
         const month = String(d.getMonth() + 1).padStart(2, '0');
         const year = d.getFullYear();
-        return format
-            .replace('dd', day)
-            .replace('MM', month)
-            .replace('yyyy', year);
+        return typeof format === 'string'
+            ? format.replace('dd', day).replace('MM', month).replace('yyyy', year)
+            : '';
     },
+
 
     parseDate: (dateString, format = 'dd-MM-yyyy') => {
         if (!dateString) return undefined;
