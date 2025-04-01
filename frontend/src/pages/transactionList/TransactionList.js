@@ -6,9 +6,9 @@ import PieChart from '../../components/PieChart';
 import '../../styles/ExpenseList.css';
 import _ from 'lodash';
 import { DateUtils } from '../../utils/DateUtils';
-import Filters from '../../pages/expenseList/Filters';
-import BudgetSummary from '../../pages/expenseList/BudgetSummary';
-import TransactionTable from '../../pages/expenseList/TransactionTable';
+import Filters from './Filters';
+import BudgetSummary from './BudgetSummary';
+import TransactionTable from './TransactionTable';
 import { showConfirmation, showError, showSuccess } from "../../utils/SweetAlertUtils";
 
 function TransactionList() {
@@ -44,22 +44,31 @@ function TransactionList() {
         setLoading(true);
         setError(null);
         try {
-            const { year, month } = filters;
+            const { year, month, date } = filters;
 
-            // Fetch monthly summary instead of separate calls
+            const formattedFilters = {
+                ...filters,
+                date: date ? DateUtils.parseDate(date, 'dd-MM-yyyy') : undefined,
+            };
+
             const monthlySummary = await apiService.getMonthlySummary(year, month);
             const expenseData = await apiService.getExpensesByFilters(
                 Object.fromEntries(
-                    Object.entries(filters).map(([key, value]) => [key, value || undefined])
+                    Object.entries(formattedFilters).map(([key, value]) => [key, value || undefined])
                 )
             );
+
+            const formattedExpenses = expenseData.map(expense => ({
+                ...expense,
+                date: DateUtils.formatDate(expense.date, 'dd-MM-yyyy'),
+            }));
 
             setFinancialData({
                 monthlyBudget: monthlySummary?.totalBudget ?? 0.00,
                 totalIncome: monthlySummary?.totalIncome ?? 0.00,
                 totalSpent: monthlySummary?.totalOutgoings ?? 0.00,
             });
-            setExpenses(expenseData || []);
+            setExpenses(formattedExpenses || []);
         } catch (err) {
             console.error('Failed to fetch data:', err);
             setError('Failed to load data. Please try again.');
@@ -103,7 +112,11 @@ function TransactionList() {
         if (!confirmed) return;
 
         try {
-            await updateTransaction(transactionId, editForm);
+            const formattedEditForm = {
+                ...editForm,
+                date: editForm.date ? DateUtils.parseDate(editForm.date, 'dd-MM-yyyy') : undefined, // Backend'e uygun format
+            };
+            await updateTransaction(transactionId, formattedEditForm);
             showSuccess({ text: 'Expense updated successfully!' });
             setEditingExpenseId(null);
             setEditForm({
@@ -128,7 +141,7 @@ function TransactionList() {
             ...(name === 'year' || name === 'month'
                 ? {
                     category: '',
-                    status: location.state?.status || '', // Preserve status from navigation
+                    status: location.state?.status || '',
                     currency: '',
                     date: '',
                 }

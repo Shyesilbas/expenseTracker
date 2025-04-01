@@ -3,6 +3,7 @@ package com.serhat.expenseTracker.entity;
 import com.serhat.expenseTracker.entity.enums.Category;
 import com.serhat.expenseTracker.entity.enums.Currency;
 import com.serhat.expenseTracker.entity.enums.Status;
+import com.serhat.expenseTracker.entity.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,6 +48,25 @@ public  class Transaction {
     @Column(name = "updated_at")
     private LocalDate updatedAt;
 
+    @Column(name = "type", nullable = false)
+    @Enumerated(EnumType.STRING)
+
+    private TransactionType type;
+    @Column(name = "day_of_month")
+    private Integer dayOfMonth;
+
+    @Column(name = "start_month")
+    private Integer startMonth;
+
+    @Column(name = "start_year")
+    private Integer startYear;
+
+    @Column(name = "end_month")
+    private Integer endMonth;
+
+    @Column(name = "end_year")
+    private Integer endYear;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private AppUser user;
@@ -55,4 +75,5 @@ public  class Transaction {
     void initTransaction(){
         this.updatedAt=LocalDate.now();
     }
+
 }

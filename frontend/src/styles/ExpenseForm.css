@@ -9,12 +9,34 @@
     font-family: 'Arial', sans-serif;
 }
 
-/* Title styling */
-.modern-expense-form-container h2 {
-    font-size: 24px;
-    color: #34495e;
-    text-align: center;
+/* Tab header styling */
+.tab-header {
+    display: flex;
+    gap: 10px;
     margin-bottom: 20px;
+    justify-content: center;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #ecf0f1;
+    color: #34495e;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+    background-color: #3498db;
+    color: #fff;
+    border-color: #3498db;
+}
+
+.tab-btn:hover:not(.active) {
+    background-color: #dfe6e9;
 }
 
 /* Form styling */
@@ -145,5 +167,9 @@
 
     .modern-expense-form-container {
         margin: 20px;
+    }
+
+    .tab-header {
+        flex-direction: column;
     }
 }

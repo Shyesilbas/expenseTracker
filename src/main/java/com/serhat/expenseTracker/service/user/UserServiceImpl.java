@@ -100,7 +100,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private BigDecimal getOutgoingsBetweenDates(LocalDate startDate, LocalDate endDate) {
-        List<Transaction> transactions = transactionRepository.findTransactionByUserAndDateBetween(getCurrentUser(), startDate, endDate);
+        List<Transaction> transactions = transactionRepository.findByUserAndDateBetween(getCurrentUser(), startDate, endDate);
         return transactions.stream()
                 .filter(expense -> expense.getStatus() != Status.INCOME)
                 .map(Transaction::getAmount)

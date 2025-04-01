@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TransactionMapper {
 
-    public TransactionDto toTransactionDto(Transaction expense){
+    public TransactionDto toTransactionDto(Transaction expense) {
         return new TransactionDto(
                 expense.getTransactionId(),
                 expense.getAmount(),
@@ -15,8 +15,13 @@ public class TransactionMapper {
                 expense.getDate(),
                 expense.getCategory(),
                 expense.getStatus(),
-                expense.getDescription()
+                expense.getDescription(),
+                expense.getType(),
+                expense.getDayOfMonth(),
+                expense.getStartMonth(),
+                expense.getStartYear(),
+                expense.getEndMonth(),
+                expense.getEndYear()
         );
     }
-
 }

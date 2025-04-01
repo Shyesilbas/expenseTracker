@@ -10,6 +10,7 @@ import com.serhat.expenseTracker.entity.Transaction;
 import com.serhat.expenseTracker.entity.enums.Category;
 import com.serhat.expenseTracker.entity.enums.Currency;
 import com.serhat.expenseTracker.entity.enums.Status;
+import com.serhat.expenseTracker.entity.enums.TransactionType;
 import com.serhat.expenseTracker.exception.ExpenseNotFoundException;
 import com.serhat.expenseTracker.mapper.TransactionMapper;
 import com.serhat.expenseTracker.repository.TransactionRepository;
@@ -48,26 +49,25 @@ public class TransactionServiceImpl implements TransactionService {
                 .toList();
     }
 
-
     @Override
     public String deleteTransaction(Long transactionId) {
         AppUser user = currentUser();
         Transaction transaction = transactionRepository.findByUserAndTransactionId(user, transactionId)
-                .orElseThrow(() -> new ExpenseNotFoundException("Expense not found by id: " + transactionId));
+                .orElseThrow(() -> new ExpenseNotFoundException("Transaction not found by id: " + transactionId));
 
         transactionRepository.delete(transaction);
-        return "Expense deleted successfully.";
+        return "Transaction deleted successfully.";
     }
 
     @Override
     public TransactionDto updateTransaction(UpdateTransactionRequest request) {
         if (request.id() == null) {
-            throw new IllegalArgumentException("Expense ID cannot be null");
+            throw new IllegalArgumentException("Transaction ID cannot be null");
         }
 
         AppUser user = currentUser();
         Transaction transaction = transactionRepository.findByUserAndTransactionId(user, request.id())
-                .orElseThrow(() -> new ExpenseNotFoundException("Expense not found by id: " + request.id()));
+                .orElseThrow(() -> new ExpenseNotFoundException("Transaction not found by id: " + request.id()));
 
         if (request.amount() != null) {
             transaction.setAmount(request.amount());
@@ -97,25 +97,65 @@ public class TransactionServiceImpl implements TransactionService {
         AppUser user = currentUser();
         Currency selectedCurrency = user.getFavoriteCurrency() != null ? user.getFavoriteCurrency() : expenseRequest.currency();
 
-        Transaction transaction = Transaction.builder()
-                .amount(expenseRequest.amount())
-                .description(expenseRequest.description())
-                .category(expenseRequest.category())
-                .date(expenseRequest.date())
-                .status(expenseRequest.status())
-                .currency(selectedCurrency)
-                .user(user)
-                .build();
+        if (expenseRequest.transactionType() == TransactionType.RECURRING &&
+                expenseRequest.startMonth() != null && expenseRequest.startYear() != null &&
+                expenseRequest.endMonth() != null && expenseRequest.endYear() != null) {
+            LocalDate start = LocalDate.of(expenseRequest.startYear(), expenseRequest.startMonth(), 1);
+            LocalDate end = LocalDate.of(expenseRequest.endYear(), expenseRequest.endMonth(), 1)
+                    .withDayOfMonth(LocalDate.of(expenseRequest.endYear(), expenseRequest.endMonth(), 1).lengthOfMonth());
 
-        transactionRepository.save(transaction);
-        return transactionMapper.toTransactionDto(transaction);
+            int dayOfMonth = expenseRequest.dayOfMonth() != null && expenseRequest.dayOfMonth() >= 1 && expenseRequest.dayOfMonth() <= 31
+                    ? expenseRequest.dayOfMonth()
+                    : 1;
+
+            Transaction firstTransaction = null;
+            LocalDate currentDate = start.withDayOfMonth(Math.min(dayOfMonth, start.lengthOfMonth()));
+            while (!currentDate.isAfter(end)) {
+                Transaction recurringTransaction = Transaction.builder()
+                        .amount(expenseRequest.amount())
+                        .description(expenseRequest.description())
+                        .category(expenseRequest.category())
+                        .date(currentDate)
+                        .status(expenseRequest.status())
+                        .currency(selectedCurrency)
+                        .user(user)
+                        .type(TransactionType.RECURRING)
+                        .dayOfMonth(expenseRequest.dayOfMonth())
+                        .startMonth(expenseRequest.startMonth())
+                        .startYear(expenseRequest.startYear())
+                        .endMonth(expenseRequest.endMonth())
+                        .endYear(expenseRequest.endYear())
+                        .build();
+
+                transactionRepository.save(recurringTransaction);
+                if (firstTransaction == null) {
+                    firstTransaction = recurringTransaction;
+                }
+                currentDate = currentDate.plusMonths(1).withDayOfMonth(Math.min(dayOfMonth, currentDate.plusMonths(1).lengthOfMonth()));
+            }
+            return transactionMapper.toTransactionDto(firstTransaction);
+        } else {
+            Transaction oneTimeTransaction = Transaction.builder()
+                    .amount(expenseRequest.amount())
+                    .description(expenseRequest.description())
+                    .category(expenseRequest.category())
+                    .date(expenseRequest.date() != null ? expenseRequest.date() : LocalDate.now())
+                    .status(expenseRequest.status())
+                    .currency(selectedCurrency)
+                    .user(user)
+                    .type(TransactionType.ONE_TIME)
+                    .build();
+
+            transactionRepository.save(oneTimeTransaction);
+            return transactionMapper.toTransactionDto(oneTimeTransaction);
+        }
     }
 
     @Override
     public TransactionDto findTransactionById(Long transactionId) {
         AppUser user = currentUser();
         Transaction transaction = transactionRepository.findByUserAndTransactionId(user, transactionId)
-                .orElseThrow(() -> new ExpenseNotFoundException("Expense not found for user with id: " + transactionId));
+                .orElseThrow(() -> new ExpenseNotFoundException("Transaction not found for user with id: " + transactionId));
 
         return transactionMapper.toTransactionDto(transaction);
     }
@@ -126,12 +166,12 @@ public class TransactionServiceImpl implements TransactionService {
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
 
-        List<Transaction> expenses = findExpensesByDateRange(user, startDate, endDate);
+        List<Transaction> transactions = findExpensesByDateRange(user, startDate, endDate);
         BigDecimal totalIncome = userService.getIncomeByYearAndMonth(year, month);
         BigDecimal totalOutgoings = userService.getOutgoingsByYearAndMonth(year, month);
         BigDecimal totalBudget = userService.getBudgetStatusByYearAndMonth(year, month);
 
-        Map<Category, List<CategoryExpensesDto>> groupedExpenses = expenses.stream()
+        Map<Category, List<CategoryExpensesDto>> groupedExpenses = transactions.stream()
                 .collect(Collectors.groupingBy(
                         Transaction::getCategory,
                         Collectors.collectingAndThen(
@@ -149,8 +189,6 @@ public class TransactionServiceImpl implements TransactionService {
 
         return new SummaryDto(totalIncome, totalOutgoings, totalBudget, groupedExpenses);
     }
-
-
 
     @Override
     public SummaryDto getSummaryByYear(int year) {
@@ -182,7 +220,6 @@ public class TransactionServiceImpl implements TransactionService {
 
         return new SummaryDto(totalIncome, totalOutgoings, totalBudget, groupedExpenses);
     }
-
 
     @Override
     public List<TransactionDto> findTransactionsByFilters(
