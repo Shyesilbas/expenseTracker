@@ -6,7 +6,7 @@ import { DateUtils } from '../utils/DateUtils';
 import { CATEGORIES, CURRENCIES } from '../constants/constants';
 import { showConfirmation, showError, showSuccess } from "../utils/SweetAlertUtils";
 
-function ExpenseForm() {
+function TransactionForm() {
     const today = new Date();
     today.setHours(today.getHours() + 3);
     const formattedDate = today.toISOString().split('T')[0];
@@ -59,9 +59,9 @@ function ExpenseForm() {
                 ...expense,
                 date: formattedDate,
             };
-            await apiService.createExpense(expenseToSend); // Send expense data to server
+            await apiService.createTransaction(expenseToSend); // Send expense data to server
             showSuccess({ text: 'Transaction added successfully!' });
-            navigate('/expenses');
+            navigate('/transactions');
         } catch (err) {
             showError({
                 text: `Error: ${err.response?.status || 'Unknown'} - ${err.response?.data?.message || err.message}`,
@@ -170,4 +170,4 @@ function ExpenseForm() {
     );
 }
 
-export default ExpenseForm;
+export default TransactionForm;

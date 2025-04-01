@@ -17,12 +17,12 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "expense")
-public class Expense {
+@Table(name = "transaction")
+public  class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long expenseId;
+    private Long transactionId;
 
     private BigDecimal amount;
 
@@ -52,7 +52,7 @@ public class Expense {
     private AppUser user;
 
     @PrePersist
-    void initExpense(){
+    void initTransaction(){
         this.updatedAt=LocalDate.now();
     }
 }

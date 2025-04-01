@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { deleteExpense, updateExpense } from '../../services/ExpenseService';
+import { deleteTransaction, updateTransaction } from '../../services/TransactionService';
 import apiService from '../../services/api';
 import PieChart from '../../components/PieChart';
 import '../../styles/ExpenseList.css';
@@ -8,10 +8,10 @@ import _ from 'lodash';
 import { DateUtils } from '../../utils/DateUtils';
 import Filters from '../../pages/expenseList/Filters';
 import BudgetSummary from '../../pages/expenseList/BudgetSummary';
-import ExpenseTable from '../../pages/expenseList/ExpenseTable';
+import TransactionTable from '../../pages/expenseList/TransactionTable';
 import { showConfirmation, showError, showSuccess } from "../../utils/SweetAlertUtils";
 
-function ExpenseList() {
+function TransactionList() {
     const currentDate = new Date();
     const location = useLocation();
     const [expenses, setExpenses] = useState([]);
@@ -75,7 +75,7 @@ function ExpenseList() {
         return () => debouncedFetchData.cancel();
     }, [debouncedFetchData]);
 
-    const handleDeleteExpense = async (expenseId) => {
+    const handleDeleteExpense = async (transactionId) => {
         const confirmed = await showConfirmation({
             title: 'Are you sure?',
             text: 'Do you really want to delete this expense?',
@@ -85,7 +85,7 @@ function ExpenseList() {
         if (!confirmed) return;
 
         try {
-            await deleteExpense(expenseId);
+            await deleteTransaction(transactionId);
             showSuccess({ text: 'Expense deleted successfully!' });
             fetchData();
         } catch (error) {
@@ -93,7 +93,7 @@ function ExpenseList() {
         }
     };
 
-    const handleUpdateExpense = async (expenseId) => {
+    const handleUpdateExpense = async (transactionId) => {
         const confirmed = await showConfirmation({
             title: 'Update Expense',
             text: 'Are you sure you want to update this expense?',
@@ -103,7 +103,7 @@ function ExpenseList() {
         if (!confirmed) return;
 
         try {
-            await updateExpense(expenseId, editForm);
+            await updateTransaction(transactionId, editForm);
             showSuccess({ text: 'Expense updated successfully!' });
             setEditingExpenseId(null);
             setEditForm({
@@ -155,7 +155,7 @@ function ExpenseList() {
                 totalSpent={financialData.totalSpent}
             />
 
-            <ExpenseTable
+            <TransactionTable
                 expenses={expenses}
                 loading={loading}
                 editingExpenseId={editingExpenseId}
@@ -180,4 +180,4 @@ function ExpenseList() {
     );
 }
 
-export default ExpenseList;
+export default TransactionList;

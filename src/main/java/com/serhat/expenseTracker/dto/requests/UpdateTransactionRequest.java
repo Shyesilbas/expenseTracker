@@ -8,13 +8,14 @@ import com.serhat.expenseTracker.entity.enums.Status;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public record ExpenseRequest(
-        BigDecimal amount ,
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
-        LocalDate date,
-        Category category,
-        Status status ,
+public record UpdateTransactionRequest(
+        Long id,
+        BigDecimal amount,
+        Currency currency,
         String description,
-        Currency currency
+        Status status,
+        Category category,
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+        LocalDate date
 ) {
 }

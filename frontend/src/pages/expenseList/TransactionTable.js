@@ -2,7 +2,7 @@ import React from 'react';
 import { CATEGORIES, STATUSES, CURRENCIES } from '../../constants/constants';
 import { DateUtils } from '../../utils/DateUtils';
 
-function ExpenseTable({
+function TransactionTable({
                           expenses,
                           loading,
                           editingExpenseId,
@@ -138,4 +138,4 @@ function ExpenseTable({
     );
 }
 
-export default ExpenseTable;
+export default TransactionTable;

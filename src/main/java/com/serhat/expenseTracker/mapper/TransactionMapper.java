@@ -1,15 +1,15 @@
 package com.serhat.expenseTracker.mapper;
 
-import com.serhat.expenseTracker.dto.objects.ExpenseDto;
-import com.serhat.expenseTracker.entity.Expense;
+import com.serhat.expenseTracker.dto.objects.TransactionDto;
+import com.serhat.expenseTracker.entity.Transaction;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ExpenseMapper {
+public class TransactionMapper {
 
-    public ExpenseDto toExpenseDto(Expense expense){
-        return new ExpenseDto(
-                expense.getExpenseId(),
+    public TransactionDto toTransactionDto(Transaction expense){
+        return new TransactionDto(
+                expense.getTransactionId(),
                 expense.getAmount(),
                 expense.getCurrency(),
                 expense.getDate(),

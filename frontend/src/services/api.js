@@ -47,14 +47,6 @@ class ApiService {
         }
     }
 
-    async getExpenseById(expenseId) {
-        try {
-            const response = await this.api.get(`/api/expenses/${expenseId}`);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
-        }
-    }
 
     async getMonthlySummary(year, month) {
         try {
@@ -75,7 +67,7 @@ class ApiService {
     }
 
     // Expense APIs
-    async createExpense(data) {
+    async createTransaction(data) {
         try {
             const response = await this.api.post('/api/expenses/create', data);
             return response.data;
@@ -128,18 +120,18 @@ class ApiService {
         }
     }
 
-    async deleteExpense(expenseId) {
+    async deleteTransaction(transactionId) {
         try {
-            const response = await this.api.delete(`/api/expenses/delete/${expenseId}`);
+            const response = await this.api.delete(`/api/expenses/delete/${transactionId}`);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
         }
     }
 
-    async updateExpense(expenseId, data) {
+    async updateTransaction(transactionId, data) {
         try {
-            const response = await this.api.put(`/api/expenses/update/${expenseId}`, data);
+            const response = await this.api.put(`/api/expenses/update/${transactionId}`, data);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

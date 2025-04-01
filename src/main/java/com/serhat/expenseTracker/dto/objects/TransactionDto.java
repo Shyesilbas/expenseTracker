@@ -5,11 +5,12 @@ import com.serhat.expenseTracker.entity.enums.Category;
 import com.serhat.expenseTracker.entity.enums.Currency;
 import com.serhat.expenseTracker.entity.enums.Status;
 
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public record ExpenseDto(
-         Long expenseId,
+public record TransactionDto(
+         Long transactionId,
          BigDecimal amount,
          Currency currency,
          @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")

@@ -3,10 +3,10 @@ import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Register from './pages/Register';
-import ExpenseList from './pages/expenseList/ExpenseList';
+import TransactionList from './pages/expenseList/TransactionList';
 import SavingsPage from './pages/SavingsPage';
 import CurrencyConversion from './pages/CurrencyConversion';
-import ExpenseForm from './pages/ExpenseForm';
+import TransactionForm from './pages/TransactionForm';
 import Settings from './pages/Settings';
 import Sidebar from './components/Sidebar';
 import React, { useState, useEffect } from 'react';
@@ -68,9 +68,9 @@ function App() {
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/savings" element={<SavingsPage />} />
                     <Route path="/settings" element={<Settings />} />
-                    <Route path="/expenses" element={<ExpenseList />} />
+                    <Route path="/transactions" element={<TransactionList />} />
                     <Route path="/currency/convert" element={<CurrencyConversion />} />
-                    <Route path="/expenses/add" element={<ExpenseForm />} />
+                    <Route path="/transactions/add" element={<TransactionForm />} />
                 </Routes>
             </div>
         </div>

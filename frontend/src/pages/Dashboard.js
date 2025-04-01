@@ -106,19 +106,19 @@ function Dashboard() {
 
     const handleIncomeClick = (e) => {
         e.stopPropagation();
-        navigate('/expenses', { state: { status: 'INCOME', year: selectedYear, month: selectedMonth } });
+        navigate('/transactions', { state: { status: 'INCOME', year: selectedYear, month: selectedMonth } });
     };
 
     const handleOutgoingsClick = (e) => {
         e.stopPropagation();
-        navigate('/expenses', { state: { status: 'OUTGOING', year: selectedYear, month: selectedMonth } });
+        navigate('/transactions', { state: { status: 'OUTGOING', year: selectedYear, month: selectedMonth } });
     };
 
     return (
         <div className="db-dashboard-container">
             <h1 className="db-dashboard-title">Welcome, {user.username}</h1>
             <div className="db-budget-grid">
-                <div className="db-budget-panel db-monthly" onClick={() => navigate('/expenses')} style={{ cursor: 'pointer' }}>
+                <div className="db-budget-panel db-monthly" onClick={() => navigate('/transactions')} style={{ cursor: 'pointer' }}>
                     <div className="db-panel-header">
                         <h2>Monthly Summary</h2>
                         <div className="db-date-selector">

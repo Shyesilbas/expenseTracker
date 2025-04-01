@@ -3,11 +3,11 @@ package com.serhat.expenseTracker.service.user;
 import com.serhat.expenseTracker.dto.objects.UserDto;
 import com.serhat.expenseTracker.dto.requests.RegisterRequest;
 import com.serhat.expenseTracker.entity.AppUser;
-import com.serhat.expenseTracker.entity.Expense;
+import com.serhat.expenseTracker.entity.Transaction;
 import com.serhat.expenseTracker.entity.enums.Currency;
 import com.serhat.expenseTracker.entity.enums.Status;
 import com.serhat.expenseTracker.mapper.UserMapper;
-import com.serhat.expenseTracker.repository.ExpenseRepository;
+import com.serhat.expenseTracker.repository.TransactionRepository;
 import com.serhat.expenseTracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
     private final UserValidationService userValidationService;
     private final UserMapper userMapper;
     private final UserDetailsServiceImpl userDetailsService;
-    private final ExpenseRepository expenseRepository;
+    private final TransactionRepository transactionRepository;
 
     @Override
     public UserDto userInfo() {
@@ -92,18 +92,18 @@ public class UserServiceImpl implements UserService {
     }
 
     private BigDecimal getIncomeBetweenDates(LocalDate startDate, LocalDate endDate) {
-        List<Expense> expenses = expenseRepository.findExpensesByUserAndDateBetween(getCurrentUser(), startDate, endDate);
-        return expenses.stream()
+        List<Transaction> transactions = transactionRepository.findByUserAndDateBetween(getCurrentUser(), startDate, endDate);
+        return transactions.stream()
                 .filter(expense -> expense.getStatus() == Status.INCOME)
-                .map(Expense::getAmount)
+                .map(Transaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private BigDecimal getOutgoingsBetweenDates(LocalDate startDate, LocalDate endDate) {
-        List<Expense> expenses = expenseRepository.findExpensesByUserAndDateBetween(getCurrentUser(), startDate, endDate);
-        return expenses.stream()
+        List<Transaction> transactions = transactionRepository.findTransactionByUserAndDateBetween(getCurrentUser(), startDate, endDate);
+        return transactions.stream()
                 .filter(expense -> expense.getStatus() != Status.INCOME)
-                .map(Expense::getAmount)
+                .map(Transaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
