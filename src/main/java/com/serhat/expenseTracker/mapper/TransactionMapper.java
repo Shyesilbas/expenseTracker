@@ -21,7 +21,8 @@ public class TransactionMapper {
                 expense.getStartMonth(),
                 expense.getStartYear(),
                 expense.getEndMonth(),
-                expense.getEndYear()
+                expense.getEndYear(),
+                expense.getRecurringSeriesId()
         );
     }
 }

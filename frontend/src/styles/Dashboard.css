@@ -1,239 +1,232 @@
+/* Color Palette */
+:root {
+    --primary-bg: #F7F9FB;      /* Light gray-blue background */
+    --card-bg: #FFFFFF;         /* White cards */
+    --text-primary: #2D3748;    /* Dark gray text */
+    --text-secondary: #718096;  /* Medium gray text */
+    --accent-blue: #4299E1;     /* Professional blue accent */
+    --positive: #38A169;        /* Green for income */
+    --negative: #E53E3E;        /* Red for outgoings */
+    --border: #E2E8F0;          /* Light gray border */
+    --shadow: rgba(0, 0, 0, 0.05);
+}
+
+/* Base Styles */
 .db-dashboard-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    font-family: 'Arial', sans-serif;
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-    box-sizing: border-box;
+    padding: 2rem;
+    background-color: var(--primary-bg);
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+/* Title */
 .db-dashboard-title {
-    font-size: 28px;
-    color: #34495e;
-    margin-bottom: 20px;
-    text-align: center;
+    font-size: 1.75rem;
+    font-weight: 500; /* Reduced from 600 */
+    color: var(--text-primary);
+    margin-bottom: 2rem;
 }
 
+/* Grid Layout */
 .db-budget-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
 
+/* Panels */
 .db-budget-panel {
-    background-color: #ffffff;
+    background-color: var(--card-bg);
     border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px var(--shadow);
     transition: transform 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
 }
 
 .db-budget-panel:hover {
     transform: translateY(-2px);
 }
 
+/* Panel Header */
 .db-panel-header {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 15px;
-    min-height: 60px;
-    gap: 10px;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .db-panel-header h2 {
-    font-size: 20px;
-    color: #2c3e50;
+    font-size: 1.25rem;
+    font-weight: 500; /* Reduced from 600 */
+    color: var(--text-primary);
     margin: 0;
-    flex-shrink: 0;
 }
 
+/* Date Selector */
+.db-date-selector {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.db-date-selector select {
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 400; /* Lighter font */
+    cursor: pointer;
+}
+
+.db-date-selector select:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+}
+
+/* Currency Converter */
+.db-currency-converter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.db-currency-converter select {
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 400; /* Lighter font */
+    cursor: pointer;
+}
+
+.db-converted-value {
+    font-size: 0.9rem;
+    font-weight: 400; /* Lighter font */
+    color: var(--text-secondary);
+}
+
+/* Panel Value */
 .db-panel-value {
-    text-align: center;
-    margin: 15px 0;
-    flex-grow: 1;
+    margin-bottom: 1.5rem;
 }
 
 .db-panel-value span {
-    font-size: 24px;
-    font-weight: bold;
+    font-size: 2rem;
+    font-weight: 500; /* Reduced from 600 */
 }
 
-.db-positive {
-    color: #27ae60;
-}
-
-.db-negative {
-    color: #e74c3c;
-}
-
+/* Sub Cards */
 .db-sub-cards {
-    display: flex;
-    gap: 15px;
+    display: grid;
+    gap: 1rem;
 }
 
-.db-income-card, .db-outgoings-card {
-    flex: 1;
-    background-color: #ecf0f1;
+.db-income-card,
+.db-outgoings-card {
+    padding: 1rem;
     border-radius: 6px;
-    padding: 15px;
-    text-align: center;
-    box-sizing: border-box;
+    background-color: rgba(245, 247, 249, 0.5);
+    transition: background-color 0.2s ease;
 }
 
-.db-income-card h3, .db-outgoings-card h3 {
-    font-size: 16px;
-    color: #34495e;
-    margin: 0 0 10px 0;
+.db-income-card:hover,
+.db-outgoings-card:hover {
+    background-color: rgba(229, 231, 235, 0.5);
 }
 
-.db-income-card span, .db-outgoings-card span {
-    font-size: 18px;
-    font-weight: 500;
+.db-income-card h3,
+.db-outgoings-card h3 {
+    font-size: 1.1rem;
+    font-weight: 400; /* Reduced from 500 */
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
 }
 
-.db-category-summary {
-    margin-top: 15px;
-    text-align: left;
+.db-income-card span,
+.db-outgoings-card span {
+    font-size: 1.5rem;
+    font-weight: 500; /* Reduced from 600 */
 }
 
+/* Category Summary */
 .db-category-summary h3 {
-    font-size: 14px;
-    color: #7f8c8d;
-    margin-bottom: 10px;
+    font-size: 1rem;
+    font-weight: 400; /* Reduced from 500 */
+    color: var(--text-primary);
+    margin: 1rem 0 0.5rem 0;
 }
 
 .db-category-list {
     list-style: none;
     padding: 0;
     margin: 0;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    background-color: #ffffff;
 }
 
 .db-category-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 12px;
-    border-bottom: 1px solid #eee;
-}
-
-.db-category-item:last-child {
-    border-bottom: none;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
 }
 
 .db-category-name {
-    font-weight: 500;
-    color: #2c3e50;
-    flex: 1;
-    text-align: left;
+    color: var(--text-primary);
+    font-weight: 400; /* Reduced from 500 */
 }
 
 .db-category-details {
     display: flex;
-    gap: 15px;
-    align-items: center;
+    gap: 1rem;
 }
 
 .db-category-transactions {
-    color: #7f8c8d;
-    font-size: 13px;
-    min-width: 40px;
-    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 400;
 }
 
 .db-category-amount {
-    color: #34495e;
-    font-weight: 500;
-    font-size: 14px;
-    min-width: 80px;
-    text-align: right;
+    color: var(--text-primary);
+    font-weight: 400; /* Reduced from 500 */
 }
 
+/* Loading and No Data */
+.db-dashboard-loading,
 .db-no-data {
-    padding: 10px;
     text-align: center;
-    color: #7f8c8d;
-    font-style: italic;
+    color: var(--text-secondary);
+    padding: 2rem;
+    font-weight: 400;
 }
 
-.db-date-selector, .db-currency-converter {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: nowrap;
+/* Positive and Negative Colors */
+.db-positive {
+    color: var(--positive);
 }
 
-.db-date-selector select, .db-currency-converter select {
-    padding: 5px 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: #fff;
-    color: #34495e;
-    font-size: 14px;
-    cursor: pointer;
-    min-width: 80px;
+.db-negative {
+    color: var(--negative);
 }
 
-.db-converted-value {
-    font-size: 14px;
-    color: #7f8c8d;
-    white-space: nowrap;
-}
-
-.db-dashboard-loading {
-    text-align: center;
-    font-size: 18px;
-    color: #7f8c8d;
-    padding: 50px;
-}
-
+/* Responsive Design */
 @media (max-width: 768px) {
+    .db-dashboard-container {
+        padding: 1rem;
+    }
+
     .db-budget-grid {
         grid-template-columns: 1fr;
     }
 
-    .db-sub-cards {
+    .db-panel-value span {
+        font-size: 1.5rem;
+    }
+
+    .db-date-selector {
         flex-direction: column;
-    }
-
-    .db-panel-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-
-    .db-date-selector, .db-currency-converter {
-        flex-direction: column;
-        align-items: flex-start;
-        width: 100%;
-    }
-
-    .db-date-selector select, .db-currency-converter select {
-        width: 100%;
-    }
-
-    .db-category-item {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 5px;
-    }
-
-    .db-category-details {
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .db-category-transactions, .db-category-amount {
-        text-align: left;
-        min-width: auto;
     }
 }

@@ -60,14 +60,14 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public TransactionDto updateTransaction(UpdateTransactionRequest request) {
-        if (request.id() == null) {
+    public TransactionDto updateTransaction(Long id,UpdateTransactionRequest request) {
+        if (id == null) {
             throw new IllegalArgumentException("Transaction ID cannot be null");
         }
 
         AppUser user = currentUser();
-        Transaction transaction = transactionRepository.findByUserAndTransactionId(user, request.id())
-                .orElseThrow(() -> new ExpenseNotFoundException("Transaction not found by id: " + request.id()));
+        Transaction transaction = transactionRepository.findByUserAndTransactionId(user, id)
+                .orElseThrow(() -> new ExpenseNotFoundException("Transaction not found by id: " +id));
 
         if (request.amount() != null) {
             transaction.setAmount(request.amount());
@@ -92,83 +92,28 @@ public class TransactionServiceImpl implements TransactionService {
         return transactionMapper.toTransactionDto(transaction);
     }
 
-    @Override
-    public List<TransactionDto> getRecurringTransactions() {
-        AppUser user = currentUser();
-        List<Transaction> recurringTransactions = transactionRepository.findByUserAndType(user, TransactionType.RECURRING);
 
-        Map<String, Transaction> uniqueRecurringTransactions = recurringTransactions.stream()
-                .collect(Collectors.toMap(
-                        transaction -> transaction.getStartMonth() + "-" + transaction.getStartYear() + "-" +
-                                transaction.getEndMonth() + "-" + transaction.getEndYear() + "-" +
-                                transaction.getDayOfMonth(),
-                        transaction -> transaction,
-                        (existing, replacement) -> existing
-                ));
-
-        return uniqueRecurringTransactions.values().stream()
-                .map(transactionMapper::toTransactionDto)
-                .toList();
-    }
 
     @Override
-    public TransactionDto createTransaction(TransactionRequest expenseRequest) {
+    public TransactionDto createTransaction(TransactionRequest request) {
         AppUser user = currentUser();
-        Currency selectedCurrency = user.getFavoriteCurrency() != null ? user.getFavoriteCurrency() : expenseRequest.currency();
+        Currency selectedCurrency = user.getFavoriteCurrency() != null ? user.getFavoriteCurrency() : request.currency();
 
-        if (expenseRequest.transactionType() == TransactionType.RECURRING &&
-                expenseRequest.startMonth() != null && expenseRequest.startYear() != null &&
-                expenseRequest.endMonth() != null && expenseRequest.endYear() != null) {
-            LocalDate start = LocalDate.of(expenseRequest.startYear(), expenseRequest.startMonth(), 1);
-            LocalDate end = LocalDate.of(expenseRequest.endYear(), expenseRequest.endMonth(), 1)
-                    .withDayOfMonth(LocalDate.of(expenseRequest.endYear(), expenseRequest.endMonth(), 1).lengthOfMonth());
+        Transaction oneTimeTransaction = Transaction.builder()
+                .amount(request.amount())
+                .description(request.description())
+                .category(request.category())
+                .date(request.date() != null ? request.date() : LocalDate.now())
+                .status(request.status())
+                .currency(selectedCurrency)
+                .user(user)
+                .type(TransactionType.ONE_TIME)
+                .build();
 
-            int dayOfMonth = expenseRequest.dayOfMonth() != null && expenseRequest.dayOfMonth() >= 1 && expenseRequest.dayOfMonth() <= 31
-                    ? expenseRequest.dayOfMonth()
-                    : 1;
-
-            Transaction firstTransaction = null;
-            LocalDate currentDate = start.withDayOfMonth(Math.min(dayOfMonth, start.lengthOfMonth()));
-            while (!currentDate.isAfter(end)) {
-                Transaction recurringTransaction = Transaction.builder()
-                        .amount(expenseRequest.amount())
-                        .description(expenseRequest.description())
-                        .category(expenseRequest.category())
-                        .date(currentDate)
-                        .status(expenseRequest.status())
-                        .currency(selectedCurrency)
-                        .user(user)
-                        .type(TransactionType.RECURRING)
-                        .dayOfMonth(expenseRequest.dayOfMonth())
-                        .startMonth(expenseRequest.startMonth())
-                        .startYear(expenseRequest.startYear())
-                        .endMonth(expenseRequest.endMonth())
-                        .endYear(expenseRequest.endYear())
-                        .build();
-
-                transactionRepository.save(recurringTransaction);
-                if (firstTransaction == null) {
-                    firstTransaction = recurringTransaction;
-                }
-                currentDate = currentDate.plusMonths(1).withDayOfMonth(Math.min(dayOfMonth, currentDate.plusMonths(1).lengthOfMonth()));
-            }
-            return transactionMapper.toTransactionDto(firstTransaction);
-        } else {
-            Transaction oneTimeTransaction = Transaction.builder()
-                    .amount(expenseRequest.amount())
-                    .description(expenseRequest.description())
-                    .category(expenseRequest.category())
-                    .date(expenseRequest.date() != null ? expenseRequest.date() : LocalDate.now())
-                    .status(expenseRequest.status())
-                    .currency(selectedCurrency)
-                    .user(user)
-                    .type(TransactionType.ONE_TIME)
-                    .build();
-
-            transactionRepository.save(oneTimeTransaction);
-            return transactionMapper.toTransactionDto(oneTimeTransaction);
-        }
+        transactionRepository.save(oneTimeTransaction);
+        return transactionMapper.toTransactionDto(oneTimeTransaction);
     }
+
 
     @Override
     public TransactionDto findTransactionById(Long transactionId) {

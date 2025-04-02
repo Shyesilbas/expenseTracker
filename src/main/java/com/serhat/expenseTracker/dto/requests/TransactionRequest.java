@@ -17,11 +17,6 @@ public record TransactionRequest(
         Status status,
         TransactionType transactionType,
         String description,
-        Currency currency,
-        Integer dayOfMonth,
-        Integer startMonth,
-        Integer startYear,
-        Integer endMonth,
-        Integer endYear
+        Currency currency
 ) {
 }

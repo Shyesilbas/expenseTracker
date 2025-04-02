@@ -23,6 +23,7 @@ public record TransactionDto(
         Integer startMonth,
         Integer startYear,
         Integer endMonth,
-        Integer endYear
+        Integer endYear,
+        String recurringSeriesId
 )  {
 }

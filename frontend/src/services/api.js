@@ -66,10 +66,49 @@ class ApiService {
         }
     }
 
-    // Expense APIs
-    async createTransaction(data) {
+    async createOneTimeTransaction(data) {
         try {
-            const response = await this.api.post('/api/expenses/create', data);
+            const transactionData = {
+                amount: parseFloat(data.amount),
+                date: data.date,
+                category: data.category,
+                status: data.status,
+                transactionType: 'ONE_TIME',
+                description: data.description || '',
+                currency: data.currency
+            };
+            const response = await this.api.post('/api/expenses/create/one-time', transactionData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async createRecurringTransaction(data) {
+        try {
+            const transactionData = {
+                amount: parseFloat(data.amount),
+                category: data.category,
+                status: data.status,
+                transactionType: 'RECURRING',
+                description: data.description || '',
+                currency: data.currency,
+                dayOfMonth: parseInt(data.dayOfMonth, 10),
+                startMonth: parseInt(data.startMonth, 10),
+                startYear: parseInt(data.startYear, 10),
+                endMonth: parseInt(data.endMonth, 10),
+                endYear: parseInt(data.endYear, 10)
+            };
+            const response = await this.api.post('/api/expenses/create/recurring', transactionData);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async deleteRecurringSeries(transactionId) {
+        try {
+            const response = await this.api.delete(`/api/expenses/delete/recurring-series/${transactionId}`);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -129,14 +168,19 @@ class ApiService {
         }
     }
 
-    async updateTransaction(transactionId, data) {
+    async updateTransaction(transactionId, data, isRecurring) {
         try {
-            const response = await this.api.put(`/api/expenses/update/${transactionId}`, data);
+            const endpoint = isRecurring
+                ? `/api/expenses/update/recurring/${transactionId}`
+                : `/api/expenses/update/one-time/${transactionId}`;
+
+            const response = await this.api.put(endpoint, data);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
         }
     }
+
 
     async getMySavings() {
         try {

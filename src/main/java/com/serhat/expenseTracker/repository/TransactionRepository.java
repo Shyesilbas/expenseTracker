@@ -17,4 +17,8 @@ public interface TransactionRepository extends JpaRepository<Transaction,Long> {
     List<Transaction> findByUserAndDateBetween(AppUser user, LocalDate startDate, LocalDate endDate);
 
     List<Transaction> findByUserAndType(AppUser user, TransactionType transactionType);
+
+    List<Transaction> findByRecurringSeriesId(String recurringSeriesId);
+
+    int deleteByRecurringSeriesId(String recurringSeriesId);
 }

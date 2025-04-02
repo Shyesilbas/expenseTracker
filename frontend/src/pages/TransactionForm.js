@@ -80,11 +80,14 @@ function TransactionForm() {
         try {
             const formattedDate = DateUtils.formatDate(oneTimeTransaction.date);
             const transactionToSend = {
-                ...oneTimeTransaction,
+                amount: oneTimeTransaction.amount,
                 date: formattedDate,
-                transactionType: 'ONE_TIME',
+                category: oneTimeTransaction.category,
+                status: oneTimeTransaction.status,
+                description: oneTimeTransaction.description,
+                currency: oneTimeTransaction.currency,
             };
-            await apiService.createTransaction(transactionToSend);
+            await apiService.createOneTimeTransaction(transactionToSend);
             showSuccess({ text: 'One-time transaction added successfully!' });
             navigate('/transactions');
         } catch (err) {
@@ -107,15 +110,20 @@ function TransactionForm() {
 
         try {
             const transactionToSend = {
-                ...recurringTransaction,
-                transactionType: 'RECURRING',
-                startMonth: parseInt(recurringTransaction.startMonth, 10),
-                startYear: parseInt(recurringTransaction.startYear, 10),
-                endMonth: parseInt(recurringTransaction.endMonth, 10),
-                endYear: parseInt(recurringTransaction.endYear, 10),
-                dayOfMonth: recurringTransaction.dayOfMonth ? parseInt(recurringTransaction.dayOfMonth, 10) : undefined,
+                amount: parseFloat(recurringTransaction.amount),
+                description: recurringTransaction.description,
+                category: recurringTransaction.category,
+                status: recurringTransaction.status,
+                currency: recurringTransaction.currency,
+                startMonth: recurringTransaction.startMonth,
+                startYear: recurringTransaction.startYear,
+                endMonth: recurringTransaction.endMonth,
+                endYear: recurringTransaction.endYear,
+                dayOfMonth: recurringTransaction.dayOfMonth || undefined,
             };
-            await apiService.createTransaction(transactionToSend);
+
+            await apiService.createRecurringTransaction(transactionToSend);
+
             showSuccess({ text: 'Recurring transaction added successfully!' });
             navigate('/transactions');
         } catch (err) {
@@ -124,6 +132,7 @@ function TransactionForm() {
             });
         }
     };
+
 
     return (
         <div className="transaction-form-container">

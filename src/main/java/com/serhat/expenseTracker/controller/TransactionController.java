@@ -2,12 +2,15 @@ package com.serhat.expenseTracker.controller;
 
 import com.serhat.expenseTracker.dto.objects.SummaryDto;
 import com.serhat.expenseTracker.dto.objects.TransactionDto;
+import com.serhat.expenseTracker.dto.requests.RecurringTransactionRequest;
+import com.serhat.expenseTracker.dto.requests.RecurringTransactionUpdateRequest;
 import com.serhat.expenseTracker.dto.requests.TransactionRequest;
 import com.serhat.expenseTracker.dto.requests.UpdateTransactionRequest;
 import com.serhat.expenseTracker.entity.enums.Category;
 import com.serhat.expenseTracker.entity.enums.Currency;
 import com.serhat.expenseTracker.entity.enums.Status;
 import com.serhat.expenseTracker.service.transaction.TransactionService;
+import com.serhat.expenseTracker.service.transaction.recurring.RecurringTransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +25,17 @@ import java.util.List;
 public class TransactionController {
 
     private final TransactionService transactionService;
+    private final RecurringTransactionService recurringTransactionService;
 
-    @PostMapping("/create")
+    @PostMapping("/create/one-time")
     public ResponseEntity<TransactionDto> createExpense(@RequestBody TransactionRequest expenseRequest) {
         TransactionDto createdExpense = transactionService.createTransaction(expenseRequest);
+        return ResponseEntity.ok(createdExpense);
+    }
+
+    @PostMapping("/create/recurring")
+    public ResponseEntity<TransactionDto> createExpense(@RequestBody RecurringTransactionRequest request) {
+        TransactionDto createdExpense = recurringTransactionService.createRecurringTransaction(request);
         return ResponseEntity.ok(createdExpense);
     }
 
@@ -37,7 +47,7 @@ public class TransactionController {
 
     @GetMapping("/recurring")
     public ResponseEntity<List<TransactionDto>> getRecurringTransactions() {
-        return ResponseEntity.ok(transactionService.getRecurringTransactions());
+        return ResponseEntity.ok(recurringTransactionService.getRecurringTransactions());
     }
 
     @DeleteMapping("/delete/{transactionId}")
@@ -45,25 +55,41 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.deleteTransaction(transactionId));
     }
 
-    @PutMapping("/update/{id}")
+    @DeleteMapping("/delete/recurring-series/{transactionId}")
+    public ResponseEntity<String> deleteRecurringSeries(@PathVariable Long transactionId) {
+        return ResponseEntity.ok(recurringTransactionService.deleteRecurringSeries(transactionId));
+    }
+
+    /*
+    @DeleteMapping("/delete/recurring-single/{transactionId}")
+    public ResponseEntity<String> deleteSingleRecurringTransaction(@PathVariable Long transactionId) {
+        return ResponseEntity.ok(recurringTransactionService.deleteSingleRecurringTransaction(transactionId));
+    }
+
+     */
+
+    @PutMapping("/update/one-time/{transactionId}")
     public ResponseEntity<TransactionDto> updateExpense(
-            @PathVariable Long id,
+            @PathVariable Long transactionId,
             @RequestBody UpdateTransactionRequest request) {
-        if (!id.equals(request.id())) {
-            throw new IllegalArgumentException("Path variable ID must match request body ID");
-        }
-        return ResponseEntity.ok(transactionService.updateTransaction(request));
+        return ResponseEntity.ok(transactionService.updateTransaction(transactionId, request));
+    }
+
+    @PutMapping("/update/recurring/{transactionId}")
+    public ResponseEntity<TransactionDto> updateRecurringExpense(
+            @PathVariable Long transactionId,
+            @RequestBody RecurringTransactionUpdateRequest request) {
+        return ResponseEntity.ok(recurringTransactionService.updateRecurringTransaction(transactionId, request));
     }
 
     @GetMapping("/monthly-summary/{year}/{month}")
-    public ResponseEntity<SummaryDto> summaryByYearAndMonth(@PathVariable int year,@PathVariable int month) {
+    public ResponseEntity<SummaryDto> summaryByYearAndMonth(@PathVariable int year, @PathVariable int month) {
         return ResponseEntity.ok(transactionService.getSummaryByYearAndMonth(year, month));
     }
 
     @GetMapping("/annual-summary/{year}")
     public ResponseEntity<SummaryDto> getAnnualSummary(@PathVariable int year) {
         return ResponseEntity.ok(transactionService.getSummaryByYear(year));
-
     }
 
     @GetMapping("/filter")

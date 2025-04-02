@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
-import { deleteTransaction, updateTransaction } from '../../services/TransactionService';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { showConfirmation, showError, showSuccess } from "../../utils/SweetAlertUtils";
 import apiService from '../../services/api';
 import PieChart from '../../components/PieChart';
 import '../../styles/ExpenseList.css';
@@ -9,11 +9,11 @@ import { DateUtils } from '../../utils/DateUtils';
 import Filters from './Filters';
 import BudgetSummary from './BudgetSummary';
 import TransactionTable from './TransactionTable';
-import { showConfirmation, showError, showSuccess } from "../../utils/SweetAlertUtils";
 
 function TransactionList() {
     const currentDate = new Date();
     const location = useLocation();
+    const navigate = useNavigate();
     const [transactions, setTransactions] = useState([]);
     const [financialData, setFinancialData] = useState({
         monthlyBudget: null,
@@ -52,11 +52,10 @@ function TransactionList() {
             };
 
             const monthlySummary = await apiService.getMonthlySummary(year, month);
-            const transactionData = await apiService.getExpensesByFilters(
-                Object.fromEntries(
-                    Object.entries(formattedFilters).map(([key, value]) => [key, value || undefined])
-                )
-            );
+            const transactionData = await apiService.getExpensesByFilters({
+                year, month, date: formattedFilters.date, category: filters.category,
+                status: filters.status, currency: filters.currency
+            });
 
             const formattedTransactions = transactionData.map(transaction => ({
                 ...transaction,
@@ -94,7 +93,7 @@ function TransactionList() {
         if (!confirmed) return;
 
         try {
-            await deleteTransaction(transactionId);
+            await apiService.deleteTransaction(transactionId);
             showSuccess({ text: 'Transaction deleted successfully!' });
             fetchData();
         } catch (error) {
@@ -102,7 +101,12 @@ function TransactionList() {
         }
     };
 
-    const handleUpdateTransaction = async (transactionId) => {
+    const handleUpdateTransaction = async (transaction) => {
+        if (transaction.type === 'RECURRING') {
+            navigate('/transactions/recurring', { state: { transactionId: transaction.id } });
+            return;
+        }
+
         const confirmed = await showConfirmation({
             title: 'Update Transaction',
             text: 'Are you sure you want to update this transaction?',
@@ -113,10 +117,14 @@ function TransactionList() {
 
         try {
             const formattedEditForm = {
-                ...editForm,
+                amount: editForm.amount ? parseFloat(editForm.amount) : undefined,
+                currency: editForm.currency || undefined,
+                status: editForm.status || undefined,
+                description: editForm.description || undefined,
+                category: editForm.category || undefined,
                 date: editForm.date ? DateUtils.parseDate(editForm.date, 'dd-MM-yyyy') : undefined,
             };
-            await updateTransaction(transactionId, formattedEditForm);
+            await apiService.updateTransaction(transaction.id, formattedEditForm, false);
             showSuccess({ text: 'Transaction updated successfully!' });
             setEditingTransactionId(null);
             setEditForm({
@@ -177,7 +185,7 @@ function TransactionList() {
                 setEditingTransactionId={setEditingTransactionId}
                 onUpdateTransaction={handleUpdateTransaction}
                 onDeleteTransaction={handleDeleteTransaction}
-                showUpdateButton={(transaction) => transaction.type !== 'RECURRING'} // RECURRING için update gizle
+                showUpdateButton={(transaction) => true}
             />
 
             <div className="chart-container-wrapper">

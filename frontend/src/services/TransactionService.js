@@ -1,5 +1,4 @@
 import apiService from './api';
-import { DateUtils } from '../utils/DateUtils';
 
 export const deleteTransaction = async (transactionId) => {
     if (!transactionId || isNaN(transactionId)) {
@@ -13,23 +12,15 @@ export const deleteTransaction = async (transactionId) => {
     }
 };
 
-export const updateTransaction = async (transactionId, updateData) => {
-    const formattedData = Object.fromEntries(
-        Object.entries({
-            id: transactionId,
-            amount: updateData.amount ? Number(updateData.amount) : undefined,
-            currency: updateData.currency,
-            status: updateData.status,
-            description: updateData.description,
-            category: updateData.category,
-            date: updateData.date ? DateUtils.formatDate(updateData.date) : undefined,
-        }).filter(([_, value]) => value !== undefined && value !== '')
-    );
-
+export async function updateTransaction(transactionId, data, isRecurring) {
     try {
-        await apiService.updateTransaction(transactionId, formattedData);
+        const endpoint = isRecurring
+            ? `/api/expenses/update/recurring/${transactionId}`
+            : `/api/expenses/update/one-time/${transactionId}`;
+
+        const response = await apiService.api.put(endpoint, data);
+        return response.data;
     } catch (error) {
-        console.error('Error updating expense:', error);
-        throw new Error('Failed to update expense. Please try again.');
+        throw error.response?.data || error.message;
     }
 };
