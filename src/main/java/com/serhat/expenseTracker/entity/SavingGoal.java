@@ -16,22 +16,40 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "savings")
-public class Savings {
+@Table(name = "saving_goals")
+public class SavingGoal {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "goal_amount", nullable = false)
+    private BigDecimal goalAmount;
+
     @Column(name = "currency", nullable = false)
     @Enumerated(EnumType.STRING)
     private Currency currency;
 
-    @Column(name = "amount", nullable = false)
-    private BigDecimal amount;
+    @Column(name = "initial_amount")
+    private BigDecimal initialAmount;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "goal_name")
+    private String goalName;
+
+    @Column(name = "start_date")
+    private LocalDate startDate;
+
+    @Column(name = "target_date")
+    private LocalDate targetDate;
+
+    @Column(name = "goal_status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private GoalStatus goalStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private AppUser user;
-
 }

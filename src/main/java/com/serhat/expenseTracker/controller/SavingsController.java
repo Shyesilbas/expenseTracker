@@ -1,6 +1,8 @@
 package com.serhat.expenseTracker.controller;
 
+import com.serhat.expenseTracker.dto.objects.SavingGoalDto;
 import com.serhat.expenseTracker.dto.objects.SavingsDto;
+import com.serhat.expenseTracker.dto.requests.SavingGoalRequest;
 import com.serhat.expenseTracker.dto.requests.SavingsRequest;
 import com.serhat.expenseTracker.dto.requests.UpdateSavingsRequest;
 import com.serhat.expenseTracker.entity.enums.Currency;
@@ -41,5 +43,30 @@ public class SavingsController {
     @GetMapping("/byCurrency")
     public ResponseEntity<List<SavingsDto>> savingsByCurrency(@RequestParam Currency currency) {
         return ResponseEntity.ok(savingsService.savingsByCurrency(currency));
+    }
+
+    @PostMapping("/goal/create")
+    public ResponseEntity<SavingGoalDto> setSavingGoal(@RequestBody SavingGoalRequest savingGoalRequest) {
+        return ResponseEntity.ok(savingsService.setSavingGoal(savingGoalRequest));
+    }
+
+    @GetMapping("/goals/{goalId}")
+    public ResponseEntity<SavingGoalDto> getSavingGoal(@PathVariable Long goalId) {
+        return ResponseEntity.ok(savingsService.getSavingGoal(goalId));
+    }
+
+    @GetMapping("/goals")
+    public ResponseEntity<List<SavingGoalDto>> getAllSavingGoals() {
+        return ResponseEntity.ok(savingsService.getAllSavingGoals());
+    }
+
+    @DeleteMapping("/goal/delete/{goalId}")
+    public ResponseEntity<String> deleteSavingGoal(@PathVariable Long goalId) {
+        return ResponseEntity.ok(savingsService.deleteSavingGoal(goalId));
+    }
+
+    @PutMapping("/goal/update/{goalId}")
+    public ResponseEntity<SavingGoalDto> updateSavingGoal(@PathVariable Long goalId, @RequestBody SavingGoalRequest savingGoalRequest) {
+        return ResponseEntity.ok(savingsService.updateSavingGoal(goalId, savingGoalRequest));
     }
 }
