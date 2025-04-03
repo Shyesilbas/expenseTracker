@@ -25,7 +25,7 @@ public class SettingsController {
         }
         try {
             Currency currency = Currency.valueOf(currencyCode.toUpperCase());
-            Currency updatedCurrency = userService.setfavoriteCurrency(currency);
+            Currency updatedCurrency = userService.setFavoriteCurrency(currency);
             return ResponseEntity.ok(updatedCurrency);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(null);

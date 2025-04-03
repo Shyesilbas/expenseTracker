@@ -10,8 +10,6 @@ import com.serhat.expenseTracker.mapper.UserMapper;
 import com.serhat.expenseTracker.repository.TransactionRepository;
 import com.serhat.expenseTracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -27,32 +25,59 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final UserDetailsServiceImpl userDetailsService;
     private final TransactionRepository transactionRepository;
+    private final CurrentUserHolder currentUserHolder;
+
+    public AppUser getCurrentUser() {
+        return currentUserHolder.getCurrentUser();
+    }
 
     @Override
     public UserDto userInfo() {
         AppUser user = getCurrentUser();
-        return new UserDto(
-                user.getUsername(),
-                user.getEmail(),
-                user.getFavoriteCurrency()
-        );
+        return new UserDto(user.getUsername(), user.getEmail(), user.getFavoriteCurrency());
     }
 
     @Override
-    public Currency setfavoriteCurrency(Currency currency) {
+    public Currency setFavoriteCurrency(Currency currency) {
         AppUser user = getCurrentUser();
         user.setFavoriteCurrency(currency);
         userRepository.save(user);
-        return user.getFavoriteCurrency();
+        return currency;
+    }
+
+    private List<Transaction> getTransactionsBetweenDates(LocalDate startDate, LocalDate endDate) {
+        return transactionRepository.findByUserAndDateBetween(getCurrentUser(), startDate, endDate);
+    }
+
+    private BigDecimal calculateAmountByStatus(List<Transaction> transactions, Status status, boolean isIncome) {
+        return transactions.stream()
+                .filter(t -> isIncome ? t.getStatus() == status : t.getStatus() != status)
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal getIncomeBetweenDates(LocalDate startDate, LocalDate endDate) {
+        List<Transaction> transactions = getTransactionsBetweenDates(startDate, endDate);
+        return calculateAmountByStatus(transactions, Status.INCOME, true);
+    }
+
+    private BigDecimal getOutgoingsBetweenDates(LocalDate startDate, LocalDate endDate) {
+        List<Transaction> transactions = getTransactionsBetweenDates(startDate, endDate);
+        return calculateAmountByStatus(transactions, Status.INCOME, false);
+    }
+
+    private BigDecimal calculateBudget(LocalDate startDate, LocalDate endDate) {
+        List<Transaction> transactions = getTransactionsBetweenDates(startDate, endDate);
+        BigDecimal income = calculateAmountByStatus(transactions, Status.INCOME, true);
+        BigDecimal outgoings = calculateAmountByStatus(transactions, Status.INCOME, false);
+        return income.subtract(outgoings);
     }
 
     @Override
     public BigDecimal getBudgetStatusByYearAndMonth(int year, int month) {
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
-        BigDecimal income = getIncomeBetweenDates(startDate, endDate);
-        BigDecimal outgoings = getOutgoingsBetweenDates(startDate, endDate);
-        return income.subtract(outgoings);
+        return calculateBudget(startDate, endDate);
     }
 
     @Override
@@ -69,52 +94,25 @@ public class UserServiceImpl implements UserService {
         return getOutgoingsBetweenDates(startDate, endDate);
     }
 
+    @Override
     public BigDecimal getAnnualIncome(int year) {
         LocalDate startDate = LocalDate.of(year, 1, 1);
         LocalDate endDate = LocalDate.of(year, 12, 31);
         return getIncomeBetweenDates(startDate, endDate);
     }
 
+    @Override
     public BigDecimal getAnnualOutgoings(int year) {
         LocalDate startDate = LocalDate.of(year, 1, 1);
         LocalDate endDate = LocalDate.of(year, 12, 31);
         return getOutgoingsBetweenDates(startDate, endDate);
     }
 
-    public BigDecimal getAnnualBudget(int year) {
-        BigDecimal totalIncome = BigDecimal.ZERO;
-        BigDecimal totalOutgoings = BigDecimal.ZERO;
-        for (int month = 1; month <= 12; month++) {
-            totalIncome = totalIncome.add(getIncomeByYearAndMonth(year, month));
-            totalOutgoings = totalOutgoings.add(getOutgoingsByYearAndMonth(year, month));
-        }
-        return totalIncome.subtract(totalOutgoings);
-    }
-
-    private BigDecimal getIncomeBetweenDates(LocalDate startDate, LocalDate endDate) {
-        List<Transaction> transactions = transactionRepository.findByUserAndDateBetween(getCurrentUser(), startDate, endDate);
-        return transactions.stream()
-                .filter(expense -> expense.getStatus() == Status.INCOME)
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    private BigDecimal getOutgoingsBetweenDates(LocalDate startDate, LocalDate endDate) {
-        List<Transaction> transactions = transactionRepository.findByUserAndDateBetween(getCurrentUser(), startDate, endDate);
-        return transactions.stream()
-                .filter(expense -> expense.getStatus() != Status.INCOME)
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
     @Override
-    public AppUser getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-            return userRepository.findByUsername(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
-        }
-        throw new RuntimeException("No authenticated user found");
+    public BigDecimal getAnnualBudget(int year) {
+        LocalDate startDate = LocalDate.of(year, 1, 1);
+        LocalDate endDate = LocalDate.of(year, 12, 31);
+        return calculateBudget(startDate, endDate);
     }
 
     @Override

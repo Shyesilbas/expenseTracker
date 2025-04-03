@@ -15,7 +15,7 @@ import java.util.List;
 
 public interface TransactionService {
     String deleteTransaction(Long transactionId);
-    TransactionDto updateTransaction(Long id,UpdateTransactionRequest request);
+    TransactionDto updateTransaction(Long transactionId,UpdateTransactionRequest request);
     TransactionDto createTransaction(TransactionRequest transactionRequest);
     TransactionDto findTransactionById(Long transactionId);
     SummaryDto getSummaryByYearAndMonth(int year, int month);

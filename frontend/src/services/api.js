@@ -168,13 +168,18 @@ class ApiService {
         }
     }
 
-    async updateTransaction(transactionId, data, isRecurring) {
+    async updateRecurringTransaction(transactionId, data) {
         try {
-            const endpoint = isRecurring
-                ? `/api/expenses/update/recurring/${transactionId}`
-                : `/api/expenses/update/one-time/${transactionId}`;
+            const response = await this.api.put(`/api/expenses/update/recurring/${transactionId}`, data);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
 
-            const response = await this.api.put(endpoint, data);
+    async updateOneTimeTransaction(transactionId, data) {
+        try {
+            const response = await this.api.put(`/api/expenses/update/one-time/${transactionId}`, data);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

@@ -2,17 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import apiService from '../services/api';
 import '../styles/RecurringTransactions.css';
-import { showConfirmation, showSuccess, showError } from "../utils/SweetAlertUtils";
+import { showConfirmation, showSuccess, showError } from '../utils/SweetAlertUtils';
 
 function RecurringTransactions() {
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [editingTransaction, setEditingTransaction] = useState(null);
-    const location = useLocation();
-    const navigate = useNavigate();
-
-    const [editForm, setEditForm] = useState({
+    const [editingId, setEditingId] = useState(null);
+    const [formData, setFormData] = useState({
         amount: '',
         description: '',
         category: '',
@@ -25,12 +22,23 @@ function RecurringTransactions() {
         dayOfMonth: ''
     });
 
-    const CATEGORIES = ['SHOPPING', 'BILLS', 'SALARY' ,'ENTERTAINMENT', 'TRAVEL', 'FOOD', 'OTHER'];
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    const CATEGORIES = ['SHOPPING', 'BILLS','RENT','SALARY', 'ENTERTAINMENT', 'TRAVEL', 'FOOD', 'OTHER'];
     const STATUSES = ['INCOME', 'OUTGOING'];
     const CURRENCIES = ['USD', 'EUR', 'TRY', 'GBP'];
+    const MONTHS = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    const YEARS = Array.from({ length: 11 }, (_, i) => (2020 + i).toString()); // 2020-2030
+
+    const monthNumberToName = (num) => MONTHS[num - 1] || '';
+    const monthNameToNumber = (name) => MONTHS.indexOf(name) + 1;
 
     useEffect(() => {
-        async function fetchRecurringTransactions() {
+        const fetchTransactions = async () => {
             try {
                 const data = await apiService.getRecurringTransactions();
                 setTransactions(data);
@@ -38,106 +46,110 @@ function RecurringTransactions() {
 
                 const transactionId = location.state?.transactionId;
                 if (transactionId) {
-                    const transactionToEdit = data.find(t => t.transactionId === transactionId);
-                    if (transactionToEdit) {
-                        setEditingTransaction(transactionToEdit);
-                        setEditForm({
-                            amount: transactionToEdit.amount.toString(),
-                            description: transactionToEdit.description || '',
-                            category: transactionToEdit.category,
-                            status: transactionToEdit.status,
-                            currency: transactionToEdit.currency,
-                            startMonth: transactionToEdit.startMonth.toString(),
-                            startYear: transactionToEdit.startYear.toString(),
-                            endMonth: transactionToEdit.endMonth.toString(),
-                            endYear: transactionToEdit.endYear.toString(),
-                            dayOfMonth: transactionToEdit.dayOfMonth.toString()
+                    const transaction = data.find(t => t.transactionId === transactionId);
+                    if (transaction) {
+                        setEditingId(transactionId);
+                        setFormData({
+                            amount: transaction.amount.toString(),
+                            description: transaction.description || '',
+                            category: transaction.category,
+                            status: transaction.status,
+                            currency: transaction.currency,
+                            startMonth: monthNumberToName(transaction.startMonth),
+                            startYear: transaction.startYear.toString(),
+                            endMonth: monthNumberToName(transaction.endMonth),
+                            endYear: transaction.endYear.toString(),
+                            dayOfMonth: transaction.dayOfMonth.toString()
                         });
                     } else {
-                        console.error(`Transaction with ID ${transactionId} not found`);
                         setError(`Transaction with ID ${transactionId} not found`);
                     }
                 }
             } catch (err) {
-                setError('Failed to load recurring transactions. Please try again.');
+                setError('Failed to load transactions. Please try again.');
                 setLoading(false);
             }
-        }
-        fetchRecurringTransactions();
+        };
+        fetchTransactions();
     }, [location.state]);
 
-    const handleEditChange = (e) => {
+    const handleChange = (e) => {
         const { name, value } = e.target;
-        setEditForm(prev => ({ ...prev, [name]: value }));
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const updateRecurringTransaction = async (transactionId, data) => {
-        // Make sure transactionId is a valid value
-        if (!transactionId) {
-            throw new Error("Transaction ID is missing or invalid");
+    const validateForm = () => {
+        const day = parseInt(formData.dayOfMonth, 10);
+        if (isNaN(day) || day < 1 || day > 31) {
+            showError({ text: 'Day of Month must be between 1 and 31.' });
+            return false;
         }
-
-        try {
-            const transactionData = {
-                amount: parseFloat(data.amount),
-                description: data.description || '',
-                category: data.category,
-                status: data.status,
-                currency: data.currency,
-                dayOfMonth: parseInt(data.dayOfMonth, 10),
-                startMonth: parseInt(data.startMonth, 10),
-                startYear: parseInt(data.startYear, 10),
-                endMonth: parseInt(data.endMonth, 10),
-                endYear: parseInt(data.endYear, 10)
-            };
-
-            console.log("Updating transaction with ID:", transactionId);
-            console.log("Transaction data:", transactionData);
-
-            const response = await apiService.put(`/api/expenses/update/recurring/${transactionId}`, transactionData);
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || error.message;
+        if (!formData.amount || parseFloat(formData.amount) <= 0) {
+            showError({ text: 'Amount must be a positive number.' });
+            return false;
         }
+        if (!formData.category) {
+            showError({ text: 'Please select a category.' });
+            return false;
+        }
+        if (!formData.status) {
+            showError({ text: 'Please select a status.' });
+            return false;
+        }
+        if (!formData.currency) {
+            showError({ text: 'Please select a currency.' });
+            return false;
+        }
+        if (!formData.startMonth || !formData.endMonth) {
+            showError({ text: 'Please select start and end months.' });
+            return false;
+        }
+        if (!formData.startYear || !formData.endYear) {
+            showError({ text: 'Please select start and end years.' });
+            return false;
+        }
+        return true;
     };
 
-    const handleUpdateSubmit = async (e) => {
+    const handleUpdate = async (e) => {
         e.preventDefault();
 
-        if (!editingTransaction || !editingTransaction.transactionId) {
-            showError({ text: "No transaction selected or transaction ID is missing" });
+        if (!editingId) {
+            showError({ text: 'No transaction selected for update.' });
             return;
         }
 
+        if (!validateForm()) return;
+
         const confirmed = await showConfirmation({
             title: 'Update Recurring Transaction',
-            text: 'Are you sure you want to update this recurring transaction?',
+            text: 'Are you sure you want to update this transaction?',
             confirmButtonText: 'Yes, update it!'
         });
 
         if (!confirmed) return;
 
         try {
-            const updatedData = {
-                amount: editForm.amount,
-                description: editForm.description || '',
-                category: editForm.category,
-                status: editForm.status,
-                currency: editForm.currency,
-                startMonth: editForm.startMonth,
-                startYear: editForm.startYear,
-                endMonth: editForm.endMonth,
-                endYear: editForm.endYear,
-                dayOfMonth: editForm.dayOfMonth
+            const payload = {
+                amount: parseFloat(formData.amount),
+                description: formData.description,
+                category: formData.category,
+                status: formData.status,
+                currency: formData.currency,
+                startMonth: monthNameToNumber(formData.startMonth),
+                startYear: parseInt(formData.startYear, 10),
+                endMonth: monthNameToNumber(formData.endMonth),
+                endYear: parseInt(formData.endYear, 10),
+                dayOfMonth: parseInt(formData.dayOfMonth, 10)
             };
 
-            // Log the transaction ID to verify it's correct
-            console.log("Transaction ID before update:", editingTransaction.transactionId);
+            console.log('Updating transaction with payload:', payload);
 
-            await updateRecurringTransaction(editingTransaction.transactionId, updatedData);
-            showSuccess({ text: 'Recurring transaction updated successfully!' });
-            setEditingTransaction(null);
-            setEditForm({
+            await apiService.updateRecurringTransaction(editingId, payload);
+            showSuccess({ text: 'Transaction updated successfully!' });
+
+            setEditingId(null);
+            setFormData({
                 amount: '',
                 description: '',
                 category: '',
@@ -149,108 +161,108 @@ function RecurringTransactions() {
                 endYear: '',
                 dayOfMonth: ''
             });
-            const updatedDataList = await apiService.getRecurringTransactions();
-            setTransactions(updatedDataList);
+            const updatedData = await apiService.getRecurringTransactions();
+            setTransactions(updatedData);
             navigate('/transactions/recurring', { replace: true });
         } catch (err) {
-            showError({ text: `Error: ${err.message}` });
+            const errorMessage = err.response?.data?.message || err.message || 'Failed to update transaction.';
+            showError({ text: `Error: ${errorMessage}` });
         }
     };
 
-    const handleEditClick = (transaction) => {
-        // Check if transaction has a valid ID before editing
-        if (!transaction || !transaction.transactionId) {
-            showError({ text: "Cannot edit: Transaction is missing an ID" });
+    const startEditing = (transaction) => {
+        if (!transaction.transactionId) {
+            showError({ text: 'Invalid transaction ID.' });
             return;
         }
-
-        console.log("Selected transaction for editing:", transaction);
-        console.log("Transaction ID:", transaction.transactionId);
-
-        setEditingTransaction(transaction);
-        setEditForm({
+        setEditingId(transaction.transactionId);
+        setFormData({
             amount: transaction.amount.toString(),
             description: transaction.description || '',
             category: transaction.category,
             status: transaction.status,
             currency: transaction.currency,
-            startMonth: transaction.startMonth.toString(),
+            startMonth: monthNumberToName(transaction.startMonth),
             startYear: transaction.startYear.toString(),
-            endMonth: transaction.endMonth.toString(),
+            endMonth: monthNumberToName(transaction.endMonth),
             endYear: transaction.endYear.toString(),
             dayOfMonth: transaction.dayOfMonth.toString()
         });
     };
 
-    const handleDeleteClick = async (transaction) => {
-        // Check if transaction has a valid ID before deleting
-        if (!transaction || !transaction.transactionId) {
-            showError({ text: "Cannot delete: Transaction is missing an ID" });
+    const handleDelete = async (transactionId) => {
+        if (!transactionId) {
+            showError({ text: 'Invalid transaction ID.' });
             return;
         }
 
         const confirmed = await showConfirmation({
             title: 'Delete Recurring Transaction Series',
-            text: 'Are you sure you want to delete this entire recurring transaction series? This will delete all instances of this recurring transaction.',
-            confirmButtonText: 'Yes, delete entire series!',
+            text: 'Are you sure you want to delete this entire series?',
+            confirmButtonText: 'Yes, delete it!',
             confirmButtonColor: '#d33'
         });
 
         if (!confirmed) return;
 
         try {
-            await apiService.deleteRecurringSeries(transaction.transactionId);
-            showSuccess({ text: 'Recurring transaction series deleted successfully!' });
-
-            // Refresh the transactions list
-            const updatedDataList = await apiService.getRecurringTransactions();
-            setTransactions(updatedDataList);
+            await apiService.deleteRecurringSeries(transactionId);
+            showSuccess({ text: 'Transaction series deleted successfully!' });
+            const updatedData = await apiService.getRecurringTransactions();
+            setTransactions(updatedData);
         } catch (err) {
-            showError({ text: `Error: ${err.message}` });
+            const errorMessage = err.response?.data?.message || err.message || 'Failed to delete transaction series.';
+            showError({ text: `Error: ${errorMessage}` });
         }
     };
 
-    if (loading) {
-        return <div className="loading">Loading...</div>;
-    }
+    const cancelEditing = () => {
+        setEditingId(null);
+        setFormData({
+            amount: '',
+            description: '',
+            category: '',
+            status: '',
+            currency: '',
+            startMonth: '',
+            startYear: '',
+            endMonth: '',
+            endYear: '',
+            dayOfMonth: ''
+        });
+    };
 
-    if (error) {
-        return <div className="error">{error}</div>;
-    }
+    if (loading) return <div className="loading">Loading...</div>;
+    if (error) return <div className="error">{error}</div>;
 
     return (
         <div className="recurring-transactions-container">
             <h1 className="page-title">Recurring Transactions</h1>
 
-            {editingTransaction ? (
+            {editingId ? (
                 <div className="edit-form-container">
                     <h2>Update Recurring Transaction</h2>
-                    <form onSubmit={handleUpdateSubmit} className="edit-form">
-                        {/* Hidden field to store transaction ID */}
-                        <input type="hidden" name="transactionId" value={editingTransaction.transactionId} />
-
+                    <form onSubmit={handleUpdate} className="edit-form">
                         <div className="form-row">
                             <div className="form-group">
                                 <label>Amount</label>
                                 <input
                                     type="number"
                                     name="amount"
-                                    value={editForm.amount}
-                                    onChange={handleEditChange}
+                                    value={formData.amount}
+                                    onChange={handleChange}
                                     required
                                     step="0.01"
+                                    min="0.01"
+                                    placeholder="Enter amount"
                                 />
                             </div>
                             <div className="form-group">
                                 <label>Currency</label>
-                                <select
-                                    name="currency"
-                                    value={editForm.currency}
-                                    onChange={handleEditChange}
-                                    required
-                                >
-                                    {CURRENCIES.map(currency => (
-                                        <option key={currency} value={currency}>{currency}</option>
+                                <select name="currency" value={formData.currency} onChange={handleChange} required>
+                                    <option value="">Select Currency</option>
+                                    {CURRENCIES.map(c => (
+                                        <option key={c} value={c}>{c}</option>
                                     ))}
                                 </select>
                             </div>
@@ -259,36 +271,28 @@ function RecurringTransactions() {
                             <label>Description</label>
                             <textarea
                                 name="description"
-                                value={editForm.description}
-                                onChange={handleEditChange}
+                                value={formData.description}
+                                onChange={handleChange}
                                 rows="3"
+                                placeholder="Enter description (optional)"
                             />
                         </div>
                         <div className="form-row">
                             <div className="form-group">
                                 <label>Category</label>
-                                <select
-                                    name="category"
-                                    value={editForm.category}
-                                    onChange={handleEditChange}
-                                    required
-                                >
+                                <select name="category" value={formData.category} onChange={handleChange} required>
                                     <option value="">Select Category</option>
-                                    {CATEGORIES.map(category => (
-                                        <option key={category} value={category}>{category}</option>
+                                    {CATEGORIES.map(c => (
+                                        <option key={c} value={c}>{c}</option>
                                     ))}
                                 </select>
                             </div>
                             <div className="form-group">
                                 <label>Status</label>
-                                <select
-                                    name="status"
-                                    value={editForm.status}
-                                    onChange={handleEditChange}
-                                    required
-                                >
-                                    {STATUSES.map(status => (
-                                        <option key={status} value={status}>{status}</option>
+                                <select name="status" value={formData.status} onChange={handleChange} required>
+                                    <option value="">Select Status</option>
+                                    {STATUSES.map(s => (
+                                        <option key={s} value={s}>{s}</option>
                                     ))}
                                 </select>
                             </div>
@@ -296,53 +300,41 @@ function RecurringTransactions() {
                         <div className="form-row">
                             <div className="form-group">
                                 <label>Start Month</label>
-                                <input
-                                    type="number"
-                                    name="startMonth"
-                                    value={editForm.startMonth}
-                                    onChange={handleEditChange}
-                                    required
-                                    min="1"
-                                    max="12"
-                                />
+                                <select name="startMonth" value={formData.startMonth} onChange={handleChange} required>
+                                    <option value="">Select Month</option>
+                                    {MONTHS.map(m => (
+                                        <option key={m} value={m}>{m}</option>
+                                    ))}
+                                </select>
                             </div>
                             <div className="form-group">
                                 <label>Start Year</label>
-                                <input
-                                    type="number"
-                                    name="startYear"
-                                    value={editForm.startYear}
-                                    onChange={handleEditChange}
-                                    required
-                                    min="2000"
-                                    max="2100"
-                                />
+                                <select name="startYear" value={formData.startYear} onChange={handleChange} required>
+                                    <option value="">Select Year</option>
+                                    {YEARS.map(y => (
+                                        <option key={y} value={y}>{y}</option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
                         <div className="form-row">
                             <div className="form-group">
                                 <label>End Month</label>
-                                <input
-                                    type="number"
-                                    name="endMonth"
-                                    value={editForm.endMonth}
-                                    onChange={handleEditChange}
-                                    required
-                                    min="1"
-                                    max="12"
-                                />
+                                <select name="endMonth" value={formData.endMonth} onChange={handleChange} required>
+                                    <option value="">Select Month</option>
+                                    {MONTHS.map(m => (
+                                        <option key={m} value={m}>{m}</option>
+                                    ))}
+                                </select>
                             </div>
                             <div className="form-group">
                                 <label>End Year</label>
-                                <input
-                                    type="number"
-                                    name="endYear"
-                                    value={editForm.endYear}
-                                    onChange={handleEditChange}
-                                    required
-                                    min="2000"
-                                    max="2100"
-                                />
+                                <select name="endYear" value={formData.endYear} onChange={handleChange} required>
+                                    <option value="">Select Year</option>
+                                    {YEARS.map(y => (
+                                        <option key={y} value={y}>{y}</option>
+                                    ))}
+                                </select>
                             </div>
                         </div>
                         <div className="form-group">
@@ -350,15 +342,16 @@ function RecurringTransactions() {
                             <input
                                 type="number"
                                 name="dayOfMonth"
-                                value={editForm.dayOfMonth}
-                                onChange={handleEditChange}
+                                value={formData.dayOfMonth}
+                                onChange={handleChange}
                                 required
                                 min="1"
                                 max="31"
+                                placeholder="1-31"
                             />
                         </div>
                         <div className="form-actions">
-                            <button type="button" className="cancel-btn" onClick={() => setEditingTransaction(null)}>
+                            <button type="button" className="cancel-btn" onClick={cancelEditing}>
                                 Cancel
                             </button>
                             <button type="submit" className="update-btn">Update</button>
@@ -370,36 +363,28 @@ function RecurringTransactions() {
                     {transactions.length === 0 ? (
                         <p className="no-transactions">No recurring transactions found.</p>
                     ) : (
-                        transactions.map((transaction) => (
-                            <div key={transaction.transactionId} className="transaction-card">
+                        transactions.map(t => (
+                            <div key={t.transactionId} className="transaction-card">
                                 <div className="card-header">
-                                    <span className={`status-badge ${transaction.status.toLowerCase()}`}>
-                                        {transaction.status}
+                                    <span className={`status-badge ${t.status.toLowerCase()}`}>
+                                        {t.status}
                                     </span>
-                                    <span className="amount">
-                                        {transaction.amount} {transaction.currency}
-                                    </span>
+                                    <span className="amount">{t.amount} {t.currency}</span>
                                 </div>
                                 <div className="card-body">
-                                    <p><strong>Category:</strong> {transaction.category}</p>
-                                    <p><strong>Description:</strong> {transaction.description || 'N/A'}</p>
-                                    <p><strong>Day of Month:</strong> {transaction.dayOfMonth}</p>
+                                    <p><strong>Category:</strong> {t.category}</p>
+                                    <p><strong>Description:</strong> {t.description || 'N/A'}</p>
+                                    <p><strong>Day of Month:</strong> {t.dayOfMonth}</p>
                                     <p>
-                                        <strong>Period:</strong> {transaction.startMonth}/{transaction.startYear} -{' '}
-                                        {transaction.endMonth}/{transaction.endYear}
+                                        <strong>Period:</strong> {monthNumberToName(t.startMonth)}/{t.startYear} -{' '}
+                                        {monthNumberToName(t.endMonth)}/{t.endYear}
                                     </p>
                                 </div>
                                 <div className="card-actions">
-                                    <button
-                                        className="edit-btn"
-                                        onClick={() => handleEditClick(transaction)}
-                                    >
+                                    <button className="edit-btn" onClick={() => startEditing(t)}>
                                         Update
                                     </button>
-                                    <button
-                                        className="delete-btn"
-                                        onClick={() => handleDeleteClick(transaction)}
-                                    >
+                                    <button className="delete-btn" onClick={() => handleDelete(t.transactionId)}>
                                         Delete Series
                                     </button>
                                 </div>

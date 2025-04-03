@@ -16,7 +16,7 @@ public interface UserService {
     void validateRegistration(RegisterRequest request);
     UserDetails loadUserByUsername(String username);
 
-    Currency setfavoriteCurrency(Currency currency);
+    Currency setFavoriteCurrency(Currency currency);
     BigDecimal getBudgetStatusByYearAndMonth(int year, int month);
     BigDecimal getIncomeByYearAndMonth(int year, int month);
     BigDecimal getOutgoingsByYearAndMonth(int year, int month);

@@ -17,5 +17,4 @@ public record RecurringTransactionRequest(
         Integer endMonth,
         Integer endYear,
         Integer dayOfMonth
-) {
-}
+) {}
