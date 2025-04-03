@@ -4,7 +4,6 @@ import { showConfirmation, showError, showSuccess } from '../../utils/SweetAlert
 import apiService from '../../services/api';
 import PieChart from '../../components/PieChart';
 import '../../styles/ExpenseList.css';
-import _ from 'lodash';
 import { DateUtils } from '../../utils/DateUtils';
 import Filters from './Filters';
 import BudgetSummary from './BudgetSummary';
