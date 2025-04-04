@@ -1,15 +1,11 @@
 package com.serhat.expenseTracker.service.savings;
 
-import com.serhat.expenseTracker.dto.objects.SavingGoalDto;
 import com.serhat.expenseTracker.dto.objects.SavingsDto;
-import com.serhat.expenseTracker.dto.requests.SavingGoalRequest;
 import com.serhat.expenseTracker.dto.requests.SavingsRequest;
 import com.serhat.expenseTracker.dto.requests.UpdateSavingsRequest;
 import com.serhat.expenseTracker.entity.AppUser;
-import com.serhat.expenseTracker.entity.SavingGoal;
 import com.serhat.expenseTracker.entity.Savings;
 import com.serhat.expenseTracker.entity.enums.Currency;
-import com.serhat.expenseTracker.entity.enums.GoalStatus;
 import com.serhat.expenseTracker.exception.SavingNotFoundException;
 import com.serhat.expenseTracker.mapper.SavingsMapper;
 import com.serhat.expenseTracker.repository.SavingGoalRepository;
@@ -28,7 +24,6 @@ public class SavingsServiceImpl implements SavingsService{
     private final SavingsRepository savingsRepository;
     private final UserService userService;
     private final SavingsMapper savingsMapper;
-    private final SavingGoalRepository savingGoalRepository;
 
     @Override
     public SavingsDto addSaving(SavingsRequest request) {
@@ -41,71 +36,6 @@ public class SavingsServiceImpl implements SavingsService{
 
         return savingsMapper.toSavingsDto(savings);
     }
-
-    @Override
-    public SavingGoalDto setSavingGoal(SavingGoalRequest savingGoalRequest) {
-        AppUser user = userService.getCurrentUser();
-        SavingGoal savingGoal = SavingGoal.builder()
-                .goalAmount(savingGoalRequest.goalAmount())
-                .currency(savingGoalRequest.currency())
-                .initialAmount(savingGoalRequest.initialAmount() != null ? savingGoalRequest.initialAmount() : BigDecimal.ZERO)
-                .description(savingGoalRequest.description())
-                .goalName(savingGoalRequest.goalName())
-                .targetDate(savingGoalRequest.targetDate())
-                .goalStatus(GoalStatus.ACTIVE)
-                .user(user)
-                .build();
-
-        savingGoalRepository.save(savingGoal);
-
-        return savingsMapper.toSavingGoalDto(savingGoal);
-    }
-
-    @Override
-    public SavingGoalDto getSavingGoal(Long goalId) {
-        AppUser user = userService.getCurrentUser();
-        SavingGoal savingGoal = savingGoalRepository.findByUserAndId(user, goalId)
-                .orElseThrow(() -> new SavingNotFoundException("Saving goal not found by id: " + goalId));
-
-        return savingsMapper.toSavingGoalDto(savingGoal);
-    }
-
-    @Override
-    public List<SavingGoalDto> getAllSavingGoals() {
-        AppUser user = userService.getCurrentUser();
-        return savingGoalRepository.findByUser(user)
-                .stream()
-                .map(savingsMapper::toSavingGoalDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public String deleteSavingGoal(Long goalId) {
-        AppUser user = userService.getCurrentUser();
-        SavingGoal savingGoal = savingGoalRepository.findByUserAndId(user, goalId)
-                .orElseThrow(() -> new SavingNotFoundException("Saving goal not found by id: " + goalId));
-
-        savingGoalRepository.delete(savingGoal);
-        return "Saving goal deleted successfully.";
-    }
-
-    @Override
-    public SavingGoalDto updateSavingGoal(Long goalId, SavingGoalRequest savingGoalRequest) {
-        AppUser user = userService.getCurrentUser();
-        SavingGoal savingGoal = savingGoalRepository.findByUserAndId(user, goalId)
-                .orElseThrow(() -> new SavingNotFoundException("Saving goal not found by id: " + goalId));
-
-        savingGoal.setGoalAmount(savingGoalRequest.goalAmount());
-        savingGoal.setCurrency(savingGoalRequest.currency());
-        savingGoal.setInitialAmount(savingGoalRequest.initialAmount() != null ? savingGoalRequest.initialAmount() : BigDecimal.ZERO);
-        savingGoal.setDescription(savingGoalRequest.description());
-        savingGoal.setGoalName(savingGoalRequest.goalName());
-        savingGoal.setTargetDate(savingGoalRequest.targetDate());
-
-        savingGoalRepository.save(savingGoal);
-        return savingsMapper.toSavingGoalDto(savingGoal);
-    }
-
 
     @Override
     public String deleteSavings(Long id) {

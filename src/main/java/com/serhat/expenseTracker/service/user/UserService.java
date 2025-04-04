@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 
 public interface UserService {
     AppUser getCurrentUser();
-    UserDto userInfo();
     void saveUser(AppUser user);
     AppUser createUser(RegisterRequest request);
     void validateRegistration(RegisterRequest request);

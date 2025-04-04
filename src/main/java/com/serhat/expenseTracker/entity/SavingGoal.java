@@ -52,4 +52,12 @@ public class SavingGoal {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private AppUser user;
+
+
+    @PrePersist
+    void initGoal(){
+        this.startDate=LocalDate.now();
+        this.goalStatus=GoalStatus.ACTIVE;
+    }
+
 }

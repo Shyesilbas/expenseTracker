@@ -6,6 +6,7 @@ import com.serhat.expenseTracker.dto.requests.SavingGoalRequest;
 import com.serhat.expenseTracker.dto.requests.SavingsRequest;
 import com.serhat.expenseTracker.dto.requests.UpdateSavingsRequest;
 import com.serhat.expenseTracker.entity.enums.Currency;
+import com.serhat.expenseTracker.service.savings.SavingGoalService;
 import com.serhat.expenseTracker.service.savings.SavingsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.util.List;
 public class SavingsController {
 
     private final SavingsService savingsService;
+    private final SavingGoalService savingGoalService;
 
     @PostMapping("/addSaving")
     public ResponseEntity<SavingsDto> addSaving(@RequestBody SavingsRequest request) {
@@ -47,26 +49,26 @@ public class SavingsController {
 
     @PostMapping("/goal/create")
     public ResponseEntity<SavingGoalDto> setSavingGoal(@RequestBody SavingGoalRequest savingGoalRequest) {
-        return ResponseEntity.ok(savingsService.setSavingGoal(savingGoalRequest));
+        return ResponseEntity.ok(savingGoalService.setSavingGoal(savingGoalRequest));
     }
 
     @GetMapping("/goals/{goalId}")
     public ResponseEntity<SavingGoalDto> getSavingGoal(@PathVariable Long goalId) {
-        return ResponseEntity.ok(savingsService.getSavingGoal(goalId));
+        return ResponseEntity.ok(savingGoalService.getSavingGoal(goalId));
     }
 
     @GetMapping("/goals")
     public ResponseEntity<List<SavingGoalDto>> getAllSavingGoals() {
-        return ResponseEntity.ok(savingsService.getAllSavingGoals());
+        return ResponseEntity.ok(savingGoalService.getAllSavingGoals());
     }
 
     @DeleteMapping("/goal/delete/{goalId}")
     public ResponseEntity<String> deleteSavingGoal(@PathVariable Long goalId) {
-        return ResponseEntity.ok(savingsService.deleteSavingGoal(goalId));
+        return ResponseEntity.ok(savingGoalService.deleteSavingGoal(goalId));
     }
 
     @PutMapping("/goal/update/{goalId}")
     public ResponseEntity<SavingGoalDto> updateSavingGoal(@PathVariable Long goalId, @RequestBody SavingGoalRequest savingGoalRequest) {
-        return ResponseEntity.ok(savingsService.updateSavingGoal(goalId, savingGoalRequest));
+        return ResponseEntity.ok(savingGoalService.updateSavingGoal(goalId, savingGoalRequest));
     }
 }
